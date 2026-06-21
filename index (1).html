@@ -7,511 +7,1634 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #020617;
-            color: #f1f5f9;
-        }
-        .cyber-gradient {
-            background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
-        }
-        .cyber-card {
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(51, 65, 85, 0.5);
-        }
-        .cyber-card:hover {
-            border-color: rgba(16, 185, 129, 0.4);
-        }
-        .active-tab {
-            background-color: #10b981;
-            color: #020617;
-            font-weight: 700;
-            box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.2);
-        }
-    </style>
-</head>
-<body class="min-h-screen pb-20 md:pb-0 md:pl-64">
+  import React, { useState, useEffect } from 'react';
+import { 
+  Home, 
+  BookOpen, 
+  Award, 
+  Video, 
+  Layers, 
+  Users, 
+  Search, 
+  ChevronRight, 
+  Play, 
+  CheckCircle2, 
+  X, 
+  UserPlus, 
+  Check, 
+  Info, 
+  Book, 
+  RotateCw, 
+  TrendingUp,
+  FileText,
+  Bookmark,
+  GraduationCap
+} from 'lucide-react';
 
-    <!-- TOAST NOTIFICATION -->
-    <div id="toast" class="fixed top-5 right-5 z-50 hidden flex items-center gap-2 bg-slate-900 border border-emerald-500/30 text-emerald-400 px-4 py-3 rounded-xl shadow-2xl">
-        <span id="toast-msg" class="text-sm font-medium">Хабарлама</span>
-    </div>
+// Ғалымдар базасы
+const scientists = [
+  {
+    id: 'sc1',
+    name: 'Михаил Николаевич Долгушин',
+    years: '1908 — 1974',
+    avatar: 'MND',
+    achievement: 'Қазақстан орнитология мектебінің негізін салушылардың бірі. 5 томдық "Қазақстан құстары" монографиясының авторы.',
+    bio: 'Биология ғылымдарының докторы, профессор. Оның жетекшілігімен Қазақстандағы құстардың таралуы, экологиясы мен миграциясына қатысты алғашқы ауқымды экспедициялар ұйымдастырылды. Саяхаттары барысында мыңдаған орнитологиялық коллекциялар жинап, республика фаунасының негізін сипаттады.'
+  },
+  {
+    id: 'sc2',
+    name: 'Анатолий Федорович Ковшар',
+    years: '1937 ж.т.',
+    avatar: 'AFK',
+    achievement: 'Атақты қазақстандық орнитолог, biologically ғылымдарының докторы. Қазақстан құстарын қорғау одағының негізін қалаушы.',
+    bio: 'Тянь-Шань биік таулы аймақтарының құстарын зерттеуде әлемдік деңгейде танымал маман. "Қазақстанның Қызыл кітабын" құрастыруға белсенді атсалысты. Жүзден астам ғылыми еңбек пен танымал кітаптардың авторы.'
+  },
+  {
+    id: 'sc3',
+    name: 'Альфред Брем',
+    years: '1829 — 1884',
+    avatar: 'AB',
+    achievement: 'Әйгілі неміс зоологы, орнитолог. "Жануарлар тіршілігі" (Tierleben) атты энциклопедиялық еңбектің авторы.',
+    bio: 'Жануарлар әлемін кең танымал еткен ұлы зерттеуші. Оның еңбектері құстардың мінез-құлқы мен табиғаттағы орнын көркем әрі ғылыми дәл сипаттауымен бағаланады. Орталық Азия мен Сібір өңіріне экспедиция жасаған.'
+  }
+];
 
-    <!-- SIDEBAR -->
-    <aside class="hidden md:flex flex-col fixed left-0 top-0 bottom-0 w-64 bg-slate-900/90 backdrop-blur-md border-r border-slate-800 p-5 z-20">
-        <div class="flex items-center gap-3 mb-8">
-            <div class="p-2.5 cyber-gradient rounded-xl text-slate-950 shadow-md font-bold text-xl">
-                🦅
-            </div>
-            <div>
-                <h1 class="text-xl font-bold tracking-wider text-emerald-400">QAUYRSYN</h1>
-                <span class="text-xs text-slate-400">Орнитология порталы</span>
-            </div>
+// Құстар классификациясы
+const classification = [
+  {
+    order: 'Paleognathae (Жүгіретін құстар/Қырсыз төстілер)',
+    traits: 'Төс сүйегінде қыры болмайды, ұша алмайды. Қанаттары нашар дамыған немесе мүлдем жоқ. Аяқтары жүгіруге бейімделген.',
+    examples: 'Түйеқұстар, Киви, Эму, Казуарлар.'
+  },
+  {
+    order: 'Neognathae (Ұшатын құстар/Қырлы төстілер)',
+    traits: 'Төс сүйегінің қыры (киль) жақсы жетілген. Ұшу бұлшықеттері күшті. Қауырсындарының құрылымы күрделі, ілмекті келеді.',
+    examples: 'Бұл топқа қазіргі құстардың 99%-ы кіреді (Торғайтектестер, Сұңқартектестер, Қазтектестер т.б.).'
+  },
+  {
+    order: 'Passeriformes (Торғай тәрізділер отряды)',
+    traits: 'Ең үлкен отряд (барлық құс түрлерінің 60%-дан астамы). Аяқтары талдың бұтағын қысып ұстауға бейімделген (3 саусағы алға, 1 саусағы артқа қарайды). Дауыс аппараты өте жақсы жетілген.',
+    examples: 'Қарлығаш, Саршымшық, Бозторғай, Қарға.'
+  },
+  {
+    order: 'Falconiformes (Сұңқар тәрізділер / Жыртқыш құстар)',
+    traits: 'Тұмсығы өткір, төмен қарай имектелген. Тырнақтары мықты, жемтігін ұстап өлтіруге бейімделген. Көру қабілеті ерекше дамыған.',
+    examples: 'Бүркіт, Ителгі, Қаршыға, Сұңқар.'
+  }
+];
+
+// Қызықты деректер
+const interestingFacts = [
+  {
+    title: 'Қос тыныс алу жүйесі',
+    desc: 'Құстар ұшу кезінде ерекше энергия жұмсайды. Сондықтан оларда қос тыныс алу (двойное дыхание) жүреді: ауа өкпе арқылы өткенде де, ауа қапшықтарынан кері шыққанда да оттегі қанға сіңе береді. Бұл - жануарлар әлеміндегі ең тиімді тыныс алу аппараты.'
+  },
+  {
+    title: 'Ұлы миграция құпиясы',
+    desc: 'Кейбір құстар мыңдаған шақырымды адаспай ұшып өтеді. Зерттеулерге сәйкес, олар Жердің магниттік өрісін көре алады (криптохром белогы арқылы) және Күннің, жұлдыздардың орналасуын бағдарлау үшін ішкі астрономиялық сағатты пайдаланады.'
+  },
+  {
+    title: 'Қауырсынның аэродинамикасы',
+    desc: 'Бір құстың денесінде 1 000-нан 25 000-ға дейін қауырсын болады. Олар жеңіл болып көрінгенімен, құстың қаңқа сүйектерінің жалпы салмағынан екі есе ауыр болуы мүмкін.'
+  }
+];
+
+// Лекциялар материалдары
+const lectures = [
+  {
+    id: 'lec1',
+    title: 'Лекция 1: Орнитология пәні және құстардың шығу тегі',
+    short: 'Құстардың эволюциясы, динозаврлармен туыстығы мен археоптерикс феномені.',
+    content: `Орнитология — зоология ғылымының құстарды (Aves класын) зерттейтін маңызды саласы. Құстардың шығу тегі биоэволюциядағы ең қызықты тақырыптардың бірі болып табылады.
+    
+Заманауи палеонтологиялық деректер құстардың мезозой эрасында өмір сүрген тераподты динозаврлардан (Theropoda) шыққанын толық дәлелдейді. Көптеген тераподтардың денесі қауырсынмен қапталған және жылы қанды болған.
+
+Ең танымал өтпелі форма — Археоптерикс (Archaeopteryx lithographica). Оның құрылысында бауырымен жорғалаушылардың (тістері, ұзын сүйекті құйрығы, қанаттарындағы бос саусақтары) және құстардың (қауырсын жамылғысы, айыр сүйегі - вилочка) белгілері қатар кездеседі.
+
+Құстардың негізгі адаптациялары ұшу қабілетімен тікелей байланысты:
+1. Қаңқа сүйектерінің іші қуыс әрі жеңіл (пневматизация).
+2. Тістердің жойылып, жеңіл мүйізді тұмсыққа айналуы.
+3. Ұшу бұлшықеттері бекінетін төс сүйегінің қыры (киль) дамуы.
+4. Қос тыныс алу жүйесі мен жоғары зат алмасу жылдамдығы.`
+  },
+  {
+    id: 'lec2',
+    title: 'Лекция 2: Құстардың анатомиясы мен морфологиялық ерекшеліктері',
+    short: 'Құс қаңқасы, бұлшықет жүйесі және тері жабынының маңызы.',
+    content: `Құстардың денесі сырттай бес бөлімнен тұрады: бас, мойын, тұлға, қанат және аяқ. 
+
+Тері жабыны өте жұқа, құрғақ әрі безсіз келеді. Құстардағы жалғыз тері безі — құйрық түбінде орналасқан құйымшақ безі (копчиковая железа). Оның майлы сөлі қауырсындарды су жұғудан қорғайды және олардың серпімділігін сақтайды. Су құстарында бұл без өте жақсы дамыған.
+
+Қаңқа жүйесі ерекше берік әрі жеңіл. Мойын омыртқалары өте қозғалмалы (кейбір үкілер басын 270 градусқа доғара алады), ал арқа, бел және сегізкөз омыртқалары бір-бірімен бірігіп кеткен. Бұл ұшу кезінде тұлғаға мықты тірек береді.
+
+Қанат қаңқасы иық, білек (кәрі жілік пен шынтақ жілігі) және өзгеріске уақытша ұшыраған бақай сүйектерінен құралады. Студенттер практикалық жұмыста қанат сүйектерінің осы редукциясын мұқият талдауы тиіс.`
+  },
+  {
+    id: 'lec3',
+    title: 'Лекция 3: Қауырсынның микроқұрылымы мен қызметі',
+    short: 'Қаламша, дің және мұртшалардың өзара байланысы, аэродинамикалық маңызы.',
+    content: `Қауырсын — құстардың эволюциялық процесте пайда болған бірегей мүйізді тері туындысы. Ол эпидермис жасушаларынан түзіледі және химиялық құрамы бойынша негізінен кератин ақуызынан тұрады.
+
+Типтік контурлы қауырсынның құрылымы:
+- Қаламша немесе оған (Calamus): Тері ішіне еніп тұратын қуыс, мөлдір төменгі бөлігі.
+- Дің (Rachis): Қауырсынның өзегі болып табылатын тығыз орталық бөлігі.
+- Желпуіш (Vane): Діңнің екі жағында орналасатын жазықтықтар.
+
+Желпуіштің құрылымы өте күрделі:
+1. Бірінші реттік мұртшалар (barbs) діңнен екі жаққа таралады.
+2. Бірінші реттік мұртшалардан екінші реттік мұртшалықтар (barbules) шығады.
+3. Екінші реттік мұртшалықтарда кішкентай ілмектер (barbicels) болады. Олар көршілес мұртшаларды өзара іліп, қауырсынды тұтас, ауа өткізбейтін берік жазықтыққа айналдырады.`
+  },
+  {
+    id: 'lec4',
+    title: 'Лекция 4: Құстардың ішкі мүшелер жүйесі және физиологиясы',
+    short: 'Ас қорыту, қан айналым және жоғары жүйке жүйесінің ерекшеліктері.',
+    content: `Құстардың физиологиясы өте жылдам жүретін метаболизммен сипатталады. Дене температурасы жоғары және тұрақты (орта есеппен 40-42°C).
+
+Ас қорыту жүйесі:
+Тұмсықта тіс болмағандықтан, тамақ өңештің кеңейген бөлігі — жемсауға (зоб) түседі, мұнда ол жібиді. Одан кейін асқазанның екі бөлімінен өтеді:
+1. Безді асқазан (химикалық өңдеу).
+2. Етті асқазан (механикалық ұсақтау). Мұнда құстар арнайы жұтқан ұсақ тастар (гастролиттер) арқылы тамақты үгітеді.
+
+Қан айналым жүйесі:
+Жүрегі толық төрт қуысты (екі жүрекше, екі қарынша). Оң жақ қарыншадан тек оң жақ қолқа доғасы шығады. Веналық және артериялық қан мүлдем араласпайды, бұл мүшелерді таза оттегімен қамтамасыз етеді.`
+  },
+  {
+    id: 'lec5',
+    title: 'Лекция 5: Қазақстанның құстар фаунасы және орнитологиялық қорықтар',
+    short: 'Еліміздегі құстардың алуантүрлілігі, Қызыл кітап және Марқакөл, Алакөл қорықтары.',
+    content: `Қазақстанның географиялық орналасуы Еуразия құстарының негізгі миграциялық жолдарының қиылысында жатыр. Қазіргі таңда республика аумағында құстардың 500-ге жуық түрі тіркелген.
+
+Олардың ішінде 50-ден астам түрі Қазақстанның Қызыл кітабына енген (мысалы, Қызғылт қоқиқаз, Ителгі, Бүркіт, Жалбағай, т.б.).
+
+Маңызды орнитологиялық аймақтар:
+1. Қорғалжын мемлекеттік табиғи қорығы — қоқиқаздар ұя салатын ең солтүстік мекен.
+2. Алакөл қорығы — сирек кездесетін Реликті шағаланың (Larus relictus) ұя салатын негізгі мекені.
+3. Наурызым қорығы — далалық жыртқыш құстардың (қырандар, сұңқарлар) шоғырланған бірегей орталығы.`
+  }
+];
+
+// Видео сабақтар базасы
+const videoLessons = [
+  {
+    id: 'v1',
+    title: 'Құс қаңқасы мен ұшу физиологиясы',
+    duration: '14:25',
+    lecturer: 'Доцент С. Сейітбатталов',
+    desc: 'Бейнедәрісте құс қаңқасының ішкі қуыстары және ұшу кезіндегі бұлшықет жұмысы нақты сызбалармен көрсетіледі.',
+    videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-flying-flock-of-white-birds-41618-large.mp4',
+    comments: [
+      { author: 'Данияр', text: 'Керемет түсіндірілген! Әсіресе пневматизация туралы мәлімет қызықты болды.' },
+      { author: 'Айгерім', text: 'Осы лекциядан кейін коллоквиумды оңай тапсырдым, рақмет!' }
+    ]
+  },
+  {
+    id: 'v2',
+    title: 'Құстардың қос тыныс алу механизмі',
+    duration: '11:10',
+    lecturer: 'Профессор А. Н. Баранов',
+    desc: 'Ауа қапшықтарының жұмысы мен ұшу кезіндегі газ алмасудың анимациялық түсіндірмесі.',
+    videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-seagulls-flying-under-a-blue-sky-34509-large.mp4',
+    comments: [
+      { author: 'Мадияр', text: 'Тыныс алу циклін 3D схемамен көрген өте ыңғайлы екен.' }
+    ]
+  },
+  {
+    id: 'v3',
+    title: 'Орнитологиялық далалық практика әдістері',
+    duration: '18:40',
+    lecturer: 'аға оқытушы М. К. Жақыпова',
+    desc: 'Табиғатта құстарға мониторинг жасау, бинокльмен жұмыс және олардың дыбысын жазу негіздері.',
+    videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-swans-swimming-in-a-lake-4861-large.mp4',
+    comments: []
+  }
+];
+
+// Тест базасы (10 нұсқа)
+const quizVariants = [
+  {
+    id: 1,
+    title: '1-нұсқа: Шығу тегі мен эволюциясы',
+    questions: [
+      {
+        q: 'Құстардың қай динозаврлар тобынан шыққандығы ғылыми дәлелденген?',
+        options: ['Зауроподтар', 'Тераподтар', 'Птерозаврлар', 'Орнитоподтар'],
+        answer: 1,
+        desc: 'Құстар тераподты (Theropoda) жыртқыш динозаврлардан таралған.'
+      },
+      {
+        q: 'Археоптерикстің құстарға тән белгісін көрсетіңіз:',
+        options: ['Тістерінің болуы', 'Қауырсын жамылғысы', 'Ұзын сүйекті құйрық', 'Қанаттарындағы бос саусақтар'],
+        answer: 1,
+        desc: 'Қауырсын жамылғысы мен айыр сүйекің (вилочка) болуы — Археоптерикстің құстық белгілері.'
+      },
+      {
+        q: 'Құстар класының латынша атауы қандай?',
+        options: ['Mammalia', 'Reptilia', 'Aves', 'Amphibia'],
+        answer: 2,
+        desc: 'Aves — құстар класының ғылыми латынша атауы.'
+      }
+    ]
+  },
+  {
+    id: 2,
+    title: '2-нұсқа: Сыртқы құрылысы мен тері жабыны',
+    questions: [
+      {
+        q: 'Құстардағы жалғыз тері безі қалай аталады?',
+        options: ['Тер безі', 'Құйымшақ безі', 'Май безі', 'Сілекей безі'],
+        answer: 1,
+        desc: 'Копчиковая железа (құйымшақ безі) — құстардың құйрық түбінде орналасқан жалғыз тері безі.'
+      },
+      {
+        q: 'Тері безінен бөлінетін сөлдің негізгі қызметі қандай?',
+        options: ['Дене температурасын төмендету', 'Қауырсынды су жұғудан және сынудан қорғау', 'Қоршаған ортаға иіс шығару', 'Қан қысымын реттеу'],
+        answer: 1,
+        desc: 'Бұл бездің майлы секреті қауырсынды су өткізбейтін, жұмсақ әрі серпімді етеді.'
+      },
+      {
+        q: 'Терінің мүйізді туындыларына жатпайтынын анықтаңыз:',
+        options: ['Тұмсық қабы', 'Қауырсындар', 'Жіліншік қабыршақтары', 'Ауа қапшықтары'],
+        answer: 3,
+        desc: 'Ауа қапшықтары — тыныс алу жүйесінің ішкі мүшесі, тері туындысы емес.'
+      }
+    ]
+  },
+  {
+    id: 3,
+    title: '3-нұсқа: Қаңқа және бұлшықет жүйесі',
+    questions: [
+      {
+        q: 'Құстардың ұшу бұлшықеттері бекінетін төс сүйегіндеге ерекше өсінді:',
+        options: ['Қаламша', 'Бұғана', 'Киль (Төс қыры)', 'Сегізкөз'],
+        answer: 2,
+        desc: 'Төс сүйегінің қыры (киль) ірі ұшу бұлшықеттерінің бекінуіне қызмет етеді.'
+      },
+      {
+        q: 'Құстардың қаңқа сүйектерінің іші немен толтырылған?',
+        options: ['Қызыл кемік майымен', 'Сұйықтықпен', 'Ауамен (қуыс)', 'Ештеңемен (вакуум)'],
+        answer: 2,
+        desc: 'Сүйектердің іші қуыс әрі ауаға толы (пневматизацияланған), бұл денені айтарлықтай жеңілдетеді.'
+      },
+      {
+        q: 'Қай омыртқалар бөлімі құстарда ерекше қозғалмалы болады?',
+        options: ['Мойын', 'Арқа', 'Бел', 'Құйрық'],
+        answer: 0,
+        desc: 'Құстардың мойын бөлімі өте қозғалмалы, омыртқа саны 11-ден 25-ке дейін жетеді.'
+      }
+    ]
+  },
+  {
+    id: 4,
+    title: '4-нұсқа: Қауырсын микроқұрылымы',
+    questions: [
+      {
+        q: 'Қауырсынның теріге кіріп тұратын қуыс бөлігі қалай аталады?',
+        options: ['Дің (Rachis)', 'Мұртша (Barb)', 'Қаламша/Оған (Calamus)', 'Желпуіш (Vane)'],
+        answer: 2,
+        desc: 'Қаламша (немесе оған) — қауырсынның тері фолликуласына бекитін төменгі бөлігі.'
+      },
+      {
+        q: 'Қауырсынның көршілес мұртшаларын өзара іліктіріп тұратын құрылым:',
+        options: ['Ұсақ ілмектер (barbicels)', 'Түтікшелер', 'Желімді заттар', 'Қылшықтар'],
+        answer: 0,
+        desc: 'Екінші реттік мұртшалықтардағы ұсақ микроскопиялық ілмектер желпуішті біртұтас етеді.'
+      },
+      {
+        q: 'Қауырсын негізінен қандай органикалық заттан тұрады?',
+        options: ['Коллаген', 'Кератин ақуызы', 'Хитин', 'Целлюлоза'],
+        answer: 1,
+        desc: 'Қауырсын, тұмсық және тырнақтар қатты мүйізді зат — кератиннен құралады.'
+      }
+    ]
+  },
+  {
+    id: 5,
+    title: '5-нұсқа: Тыныс алу жүйесі',
+    questions: [
+      {
+        q: 'Құстарға тән ерекше тыныс алу процесі қалай аталады?',
+        options: ['Тері арқылы тыныс алу', 'Желбезекпен тыныс алу', 'Қос тыныс алу', 'Анаэробты тыныс алу'],
+        answer: 2,
+        desc: 'Қос тыныс алу (двойное дыхание) ауа қапшықтарының көмегімен іске асады.'
+      },
+      {
+        q: 'Тыныс алу кезіндегі газ алмасу тікелей қай мүшеде жүреді?',
+        options: ['Ауа қапшықтарында', 'Трахеяда', 'Өкпеде', 'Жемсауда'],
+        answer: 2,
+        desc: 'Газ алмасу тек өкпедеге бронх тармақтарында (парабронхтарда) ғана жүреді, ауа қапшықтары тек сорғы қызметін атқарады.'
+      },
+      {
+        q: 'Ауа қапшықтарының қосымша маңызы қандай?',
+        options: ['Денені салқындату (термореттеу)', 'Ас қорытуға көмектесу', 'Қан қысымын көтеру', 'Дыбыс шығаруды шектеу'],
+        answer: 0,
+        desc: 'Ауа қапшықтары ұшу кезінде ішкі мүшелерді қызып кетуден қорғап, салқындатады.'
+      }
+    ]
+  },
+  {
+    id: 6,
+    title: '6-нұсқа: Ас қорыту жүйесі',
+    questions: [
+      {
+        q: 'Құстардың ас қорыту жолында тамақ жұмсаратын алғашқы кеңейген бөлім:',
+        options: ['Жемсау (зоб)', 'Безді асқазан', 'Етті асқазан', 'Ащы ішек'],
+        answer: 0,
+        desc: 'Жемсау (зоб) өңештің кеңейген бөлігі болып табылады, онда тамақ уақытша жиналып, жібиді.'
+      },
+      {
+        q: 'Құстардың асқазаны неше бөлімнен тұрады?',
+        options: ['1 бөлімнен', '2 бөлімнен (безді және етті)', '3 бөлімнен', '4 бөлімнен'],
+        answer: 1,
+        desc: 'Құстарда асқазан екіге бөлінеді: химиялық өңдеуші безді және механикалық үгіткіш етті асқазан.'
+      },
+      {
+        q: 'Құстар етті асқазанда тамақты үгіту үшін не жұтады?',
+        options: ['Суды көп мөлшерде', 'Ұсақ тастар мен құмдарды (гастролит)', 'Өсімдік тамырларын', 'Ештеңе жұтпайды'],
+        answer: 1,
+        desc: 'Құстар жұтқан ұсақ тастар (гастролиттер немесе "диірмен тастары") бұлшықетті асқазанда тамақты ұнтақтауға көмектеседі.'
+      }
+    ]
+  },
+  {
+    id: 7,
+    title: '7-нұсқа: Қан айналымы және жүйке жүйесі',
+    questions: [
+      {
+        q: 'Құстардың жүрегі неше қуысты?',
+        options: ['Екі қуысты', 'Үш қуысты', 'Үш қуысты, толық емес перделі', 'Төрт қуысты'],
+        answer: 3,
+        desc: 'Құстардың жүрегі толық 4 қуысты (2 жүрекше, 2 қарынша), бұл вена мен артерия қанының араласпауын қамтамасыз етеді.'
+      },
+      {
+        q: 'Құстардың жүрегінен қай қолқа доғасы шығады?',
+        options: ['Сол жақ қолқа доғасы', 'Оң жақ қолқа доғасы', 'Қос қолқа доғасы', 'Өкпе қолқасы ғана'],
+        answer: 1,
+        desc: 'Құстарда куәландырылған тек оң жақ қолқа доғасы сақталған (сүтқоректілерде керісінше сол жақ).'
+      },
+      {
+        q: 'Ұшу кезіндегі күрделі тепе-теңдікке мидың қай бөлімі жауап береді?',
+        options: ['Сопақша ми', 'Мишық (cerebellum)', 'Аралық ми', 'Алдыңғы ми сыңарлары'],
+        answer: 1,
+        desc: 'Мишық (мозжечок) қозғалыс coordination-ына жауап береді, құстарда өте күшті дамыған.'
+      }
+    ]
+  },
+  {
+    id: 8,
+    title: '8-нұсқа: Экология және миграция',
+    questions: [
+      {
+        q: 'Құстар миграция кезінде бағдарды қалай табады?',
+        options: ['Тек өзендер ағысымен', 'Жердің магнит өрісін сезу және астрономиялық бағдармен', 'Басқа жануарлардың соңынан ілесіп', 'Кездейсоқ ұшу арқылы'],
+        answer: 1,
+        desc: 'Көретін магниттік сезгіштік (криптохромдар) және аспан денелері бойынша навигация маңызды рөл атқарады.'
+      },
+      {
+        q: 'Құстардың тұрақты дене температурасы шамамен қанша?',
+        options: ['36.6 °C', '38.5 °C', '40 - 42 °C', '45 - 50 °C'],
+        answer: 2,
+        desc: 'Құстар — жоғары метаболизмді жылы қанды жануарлар, дене температурасы орташа 40-42 °C.'
+      },
+      {
+        q: 'Жұмыртқаның сарыуызын қоршап, оны ортада ұстап тұратын бұралған жіпшелер қалай аталады?',
+        options: ['Ауа камерасы', 'Халаза (арқанша)', 'Қабықша', 'Ұрық дискісі'],
+        answer: 1,
+        desc: 'Халаза (арқаншалар) сарыуызды жұмыртқаның ортасында тұрақты ұстап тұрады.'
+      }
+    ]
+  },
+  {
+    id: 9,
+    title: '9-нұсқа: Қазақстан фаунасы',
+    questions: [
+      {
+        q: 'Қорғалжын қорығында ұя салатын, әлемдегі ең солтүстікте орналасқан сирек құс:',
+        options: ['Қызғылт қоқиқаз (фламинго)', 'Аққу', 'Бүркіт', 'Реликті шағала'],
+        answer: 0,
+        desc: 'Қорғалжын көлдері — әдемі қызғылт қоқиқаздардың (фламинго) ұя салатын ең солтүстік ареалы.'
+      },
+      {
+        q: 'Қай көлде сирек кездесетін "Реликті шағала" (Larus relictus) ұя салады?',
+        options: ['Каспий теңізі', 'Балқаш көлі', 'Алакөл', 'Зайсан'],
+        answer: 2,
+        desc: 'Алакөл мемлекеттік табиғи қорығы реликті шағаланы сақтау мақсатында ұйымдастырылған.'
+      },
+      {
+        q: 'Қазақстанның мемлекеттік рәміздерінде бейнеленген, Қызыл кітапқа енген жыртқыш құс:',
+        options: ['Ителгі', 'Бүркіт', 'Тұйғын', 'Лашын'],
+        answer: 1,
+        desc: 'Елтаңба мен Туымызда бейнеленген қыран — Бүркіт (Aquila chrysaetos).'
+      }
+    ]
+  },
+  {
+    id: 10,
+    title: '10-нұсқа: Жалпы систематика',
+    questions: [
+      {
+        q: 'Төс сүйегінің қыры (киль) мүлдем дамымаған ұша алмайтын құстар тобы:',
+        options: ['Neognathae', 'Paleognathae (Қырсыз төстілер)', 'Археоптерикстер', 'Пингвиндер'],
+        answer: 1,
+        desc: 'Paleognathae (түйеқұстар, киви) тобында киль болмайды, сондықтан олар ұша алмайды.'
+      },
+      {
+        q: 'Құстар класындағы ең көптүрлі, кең таралған отрядты атаңыз:',
+        options: ['Қазтәрізділер', 'Кептертәрізділер', 'Торғайтәрізділер (Passeriformes)', 'Сұңқартәрізділер'],
+        answer: 2,
+        desc: 'Торғайтәрізділер (Passeriformes) отряды құстардың жалпы түрінің 60%-дан астамын құрайды.'
+      },
+      {
+        q: 'Қай құстар тобы суда өмір сүреді, ұша алмайды, бірақ төс қыры жақсы жетілген?',
+        options: ['Түйеқұстар', 'Пингвиндер', 'Үйректер', 'Қазтар'],
+        answer: 1,
+        desc: 'Пингвиндер ұша алмайды, бірақ суда жүзу бұлшықеттері күшті дамығандықтан оларда киль болады.'
+      }
+    ]
+  }
+];
+
+// Бастапқы студенттер тізімі (Журнал үшін)
+const initialStudents = [
+  { id: 1, name: 'Әлібек Сұлтанов', group: 'БИО-23-01', attendance: [true, true, true, false, true], quizScores: [85, 90, 75], active: true },
+  { id: 2, name: 'Айгерім Даниярқызы', group: 'БИО-23-01', attendance: [true, true, true, true, true], quizScores: [100, 95, 100], active: true },
+  { id: 3, name: 'Диас Есенғали', group: 'БИО-23-01', attendance: [true, false, true, true, false], quizScores: [60, 70, 80], active: true },
+  { id: 4, name: 'Мадина Оспанова', group: 'БИО-23-02', attendance: [true, true, false, true, true], quizScores: [90, 85, 90], active: true },
+  { id: 5, name: 'Бауыржан Серіков', group: 'БИО-23-02', attendance: [false, false, true, true, true], quizScores: [70, 60, 65], active: true }
+];
+
+export default function App() {
+  const [activeTab, setActiveTab] = useState('home');
+  const [selectedScientist, setSelectedScientist] = useState(null);
+  const [selectedClass, setSelectedClass] = useState(null);
+  const [selectedFact, setSelectedFact] = useState(null);
+  
+  // Лекция іздеу стейті
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeLecture, setActiveLecture] = useState(lectures[0]);
+  const [bookmarks, setBookmarks] = useState(['lec1']);
+  const [lectureNotes, setLectureNotes] = useState({
+    lec1: 'Орнитология — құстарды зерттейтін ғылым. Археоптерикс өтпелі кезең болып табылады.'
+  });
+  const [currentNoteText, setCurrentNoteText] = useState('');
+
+  // Тест стейті
+  const [selectedVariant, setSelectedVariant] = useState(null);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [userAnswers, setUserAnswers] = useState({});
+  const [quizFinished, setQuizFinished] = useState(false);
+  const [quizScore, setQuizScore] = useState(0);
+
+  // Видео сабақтар стейті
+  const [videoList, setVideoList] = useState(videoLessons);
+  const [currentVideo, setCurrentVideo] = useState(videoLessons[0]);
+  const [videoPlaying, setVideoPlaying] = useState(false);
+  const [newComment, setNewComment] = useState('');
+
+  // 3D Стейт (таңдалған қауырсын бөлігі)
+  const [selected3DPart, setSelected3DPart] = useState('calamus');
+
+  // Бағалау журналы стейті
+  const [students, setStudents] = useState(initialStudents);
+  const [newStudentName, setNewStudentName] = useState('');
+  const [newStudentGroup, setNewStudentGroup] = useState('БИО-23-01');
+  const [selectedGroupFilter, setSelectedGroupFilter] = useState('All');
+
+  // Хабарламалар (Custom Notifications Toast)
+  const [toast, setToast] = useState(null);
+
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3500);
+  };
+
+  // Лекция ауысқанда конспект мәтінін жаңарту
+  useEffect(() => {
+    if (activeLecture) {
+      setCurrentNoteText(lectureNotes[activeLecture.id] || '');
+    }
+  }, [activeLecture]);
+
+  // Конспектті сақтау
+  const saveNote = () => {
+    if (activeLecture) {
+      setLectureNotes({
+        ...lectureNotes,
+        [activeLecture.id]: currentNoteText
+      });
+      showToast('Конспект сәтті сақталды!', 'success');
+    }
+  };
+
+  // Лекцияны бетбелгіге (Bookmark) қосу/алу
+  const toggleBookmark = (id) => {
+    if (bookmarks.includes(id)) {
+      setBookmarks(bookmarks.filter(b => b !== id));
+      showToast('Бетбелгілерден өшірілді');
+    } else {
+      setBookmarks([...bookmarks, id]);
+      showToast('Бетбелгілерге қосылды!', 'success');
+    }
+  };
+
+  // Видеоға пікір қосу
+  const handleAddComment = (e) => {
+    e.preventDefault();
+    if (!newComment.trim()) return;
+
+    const updatedVideoList = videoList.map(v => {
+      if (v.id === currentVideo.id) {
+        return {
+          ...v,
+          comments: [...(v.comments || []), { author: "Студент", text: newComment }]
+        };
+      }
+      return v;
+    });
+
+    setVideoList(updatedVideoList);
+    setCurrentVideo(updatedVideoList.find(v => v.id === currentVideo.id));
+    setNewComment('');
+    showToast('Пікір сәтті қосылды!', 'success');
+  };
+
+  // Тест тапсыру логикасы
+  const startQuiz = (variant) => {
+    setSelectedVariant(variant);
+    setCurrentQuestionIndex(0);
+    setUserAnswers({});
+    setQuizFinished(false);
+    showToast(`${variant.title} басталды! Сәттілік!`, 'success');
+  };
+
+  const selectAnswer = (questionIndex, optionIndex) => {
+    setUserAnswers({
+      ...userAnswers,
+      [questionIndex]: optionIndex
+    });
+  };
+
+  const nextQuestion = () => {
+    if (currentQuestionIndex < selectedVariant.questions.length - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+    } else {
+      // Тест соңы, балл есептеу
+      let correctCount = 0;
+      selectedVariant.questions.forEach((q, idx) => {
+        if (userAnswers[idx] === q.answer) {
+          correctCount++;
+        }
+      });
+      const finalScore = Math.round((correctCount / selectedVariant.questions.length) * 100);
+      setQuizScore(finalScore);
+      setQuizFinished(true);
+
+      // Белсенді қолданушының (Айгерім Даниярқызы) бағасын журналда жаңарту
+      const updatedStudents = students.map(std => {
+        if (std.id === 2) {
+          return {
+            ...std,
+            quizScores: [...std.quizScores, finalScore]
+          };
+        }
+        return std;
+      });
+      setStudents(updatedStudents);
+      showToast('Тест аяқталды. Балдарыңыз журналға жіберілді!', 'success');
+    }
+  };
+
+  // Жаңа студент қосу
+  const handleAddStudent = (e) => {
+    e.preventDefault();
+    if (!newStudentName.trim()) return;
+
+    const newStudent = {
+      id: Date.now(),
+      name: newStudentName,
+      group: newStudentGroup,
+      attendance: [true, true, true, true, true],
+      quizScores: [80],
+      active: true
+    };
+
+    setStudents([...students, newStudent]);
+    setNewStudentName('');
+    showToast(`Студент ${newStudentName} тізімге қосылды!`, 'success');
+  };
+
+  // Қатысуды өзгерту (Attendance)
+  const toggleAttendance = (studentId, index) => {
+    setStudents(students.map(std => {
+      if (std.id === studentId) {
+        const newAtt = [...std.attendance];
+        newAtt[index] = !newAtt[index];
+        return { ...std, attendance: newAtt };
+      }
+      return std;
+    }));
+    showToast('Қатысу күйі өзгертілді.');
+  };
+
+  const toggleStudentStatus = (id, name) => {
+    setStudents(students.map(std => {
+      if (std.id === id) {
+        const nextState = !std.active;
+        showToast(nextState ? `${name} архивтен шығарылды` : `${name} архивке жіберілді`);
+        return { ...std, active: nextState };
+      }
+      return std;
+    }));
+  };
+
+  const dates = ['01.09', '08.09', '15.09', '22.09', '29.09'];
+
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans flex flex-col selection:bg-emerald-500 selection:text-white pb-20 md:pb-0 md:pl-64">
+      
+      {/* Toast хабарламасы */}
+      {toast && (
+        <div className="fixed top-5 right-5 z-50 flex items-center gap-2 bg-slate-900 border border-emerald-500/30 text-emerald-400 px-4 py-3 rounded-xl shadow-2xl animate-slideIn">
+          <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+          <span className="text-sm font-medium">{toast.message}</span>
+        </div>
+      )}
+
+      {/* ДЕСКТОП СИДБАР */}
+      <aside className="hidden md:flex flex-col fixed left-0 top-0 bottom-0 w-64 bg-slate-900/90 backdrop-blur-md border-r border-slate-800 p-5 z-20">
+        <div className="flex items-center gap-3 mb-8">
+          <div className="p-2.5 bg-gradient-to-br from-emerald-400 to-teal-600 rounded-xl text-slate-950 shadow-md">
+            <GraduationCap className="w-6 h-6" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold tracking-wider text-emerald-400">QAUYRSYN</h1>
+            <span className="text-xs text-slate-400">Орнитология порталы</span>
+          </div>
         </div>
 
-        <nav class="flex-1 space-y-2">
-            <button onclick="switchTab('home')" id="btn-home" class="tab-btn w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all text-slate-400 hover:bg-slate-800 hover:text-white active-tab">
-                <span>🏠 Басты бет</span>
-            </button>
-            <button onclick="switchTab('materials')" id="btn-materials" class="tab-btn w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all text-slate-400 hover:bg-slate-800 hover:text-white">
-                <span>📖 Материалдар</span>
-            </button>
-            <button onclick="switchTab('quiz')" id="btn-quiz" class="tab-btn w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all text-slate-400 hover:bg-slate-800 hover:text-white">
-                <span>🏆 Тест орталығы</span>
-            </button>
-            <button onclick="switchTab('videos')" id="btn-videos" class="tab-btn w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all text-slate-400 hover:bg-slate-800 hover:text-white">
-                <span>🎬 Бейнесабақтар</span>
-            </button>
-            <button onclick="switchTab('model3d')" id="btn-model3d" class="tab-btn w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all text-slate-400 hover:bg-slate-800 hover:text-white">
-                <span>🧬 3D Модель</span>
-            </button>
-            <button onclick="switchTab('grades')" id="btn-grades" class="tab-btn w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all text-slate-400 hover:bg-slate-800 hover:text-white">
-                <span>📊 Бағалау журналы</span>
-            </button>
+        <nav className="flex-1 space-y-2">
+          <button 
+            onClick={() => setActiveTab('home')} 
+            className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all ${activeTab === 'home' ? 'bg-emerald-500 text-slate-950 font-bold shadow-lg shadow-emerald-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
+          >
+            <Home className="w-5 h-5" />
+            <span>Басты бет</span>
+          </button>
+          
+          <button 
+            onClick={() => setActiveTab('materials')} 
+            className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all ${activeTab === 'materials' ? 'bg-emerald-500 text-slate-950 font-bold shadow-lg shadow-emerald-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
+          >
+            <BookOpen className="w-5 h-5" />
+            <span>Материалдар</span>
+          </button>
+
+          <button 
+            onClick={() => setActiveTab('quiz')} 
+            className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all ${activeTab === 'quiz' ? 'bg-emerald-500 text-slate-950 font-bold shadow-lg shadow-emerald-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
+          >
+            <Award className="w-5 h-5" />
+            <span>Тест орталығы</span>
+          </button>
+
+          <button 
+            onClick={() => setActiveTab('videos')} 
+            className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all ${activeTab === 'videos' ? 'bg-emerald-500 text-slate-950 font-bold shadow-lg shadow-emerald-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
+          >
+            <Video className="w-5 h-5" />
+            <span>Бейнесабақтар</span>
+          </button>
+
+          <button 
+            onClick={() => setActiveTab('3d')} 
+            className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all ${activeTab === '3d' ? 'bg-emerald-500 text-slate-950 font-bold shadow-lg shadow-emerald-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
+          >
+            <Layers className="w-5 h-5" />
+            <span>3D Модель</span>
+          </button>
+
+          <button 
+            onClick={() => setActiveTab('grades')} 
+            className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all ${activeTab === 'grades' ? 'bg-emerald-500 text-slate-950 font-bold shadow-lg shadow-emerald-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
+          >
+            <Users className="w-5 h-5" />
+            <span>Бағалау журналы</span>
+          </button>
         </nav>
 
-        <div class="border-t border-slate-800 pt-4 text-center">
-            <p class="text-[10px] text-slate-500">Қауырсын LMS v3.5</p>
-            <p class="text-[10px] text-emerald-400 font-semibold">DigiBio Экожүйесі</p>
+        <div className="border-t border-slate-800 pt-4 text-center">
+          <p className="text-[10px] text-slate-500">Қауырсын LMS v3.5</p>
+          <p className="text-[10px] text-emerald-500 font-semibold">Студенттерге арналған</p>
         </div>
-    </aside>
+      </aside>
 
-    <!-- MOBILE HEADER -->
-    <header class="md:hidden bg-slate-900 border-b border-slate-800 px-5 py-4 flex justify-between items-center sticky top-0 z-20">
-        <div class="flex items-center gap-2">
-            <span class="text-xl">🦅</span>
-            <span class="font-bold tracking-wider text-emerald-400">QAUYRSYN</span>
+      {/* ЖОҒАРҒЫ ШЕБІ (Мобильді нұсқа үшін) */}
+      <header className="md:hidden bg-slate-900 border-b border-slate-800 px-5 py-4 flex justify-between items-center sticky top-0 z-20">
+        <div className="flex items-center gap-2">
+          <GraduationCap className="w-5 h-5 text-emerald-400" />
+          <span className="font-bold tracking-wider text-emerald-400">QAUYRSYN</span>
         </div>
-        <span class="text-xs bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-full border border-emerald-500/20">Орнитология</span>
-    </header>
+        <div className="flex items-center">
+          <span className="text-xs bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-full border border-emerald-500/20">
+            Орнитология
+          </span>
+        </div>
+      </header>
 
-    <!-- MAIN CONTENT CONTAINER -->
-    <main class="p-4 md:p-8 max-w-7xl w-full mx-auto">
-        
-        <!-- HOME TAB -->
-        <section id="tab-home" class="tab-content space-y-8 animate-fade-in">
-            <div class="relative rounded-3xl p-6 md:p-10 overflow-hidden cyber-gradient text-slate-950 shadow-xl">
-                <div class="max-w-2xl relative z-10">
-                    <span class="text-xs font-bold uppercase tracking-widest bg-slate-950/10 px-3 py-1 rounded-full">DigiBio Ұсынады</span>
-                    <h2 class="text-3xl md:text-5xl font-extrabold mt-4 mb-2 leading-tight">Құстар әлемінің құпиясын бізбен бірге аш!</h2>
-                    <p class="text-slate-900 text-sm md:text-base mb-6 font-medium">Интерактивті орнитология платформасына қош келдіңіз. Мұнда сіз теориялық білімді заманауи 3D модельдер және интерактивті тестер арқылы бекіте аласыз.</p>
-                    <button onclick="switchTab('materials')" class="bg-slate-950 text-white px-6 py-3 rounded-xl font-bold hover:bg-slate-900 transition-all text-sm shadow-md">Оқуды бастау →</button>
+      {/* НЕГІЗГІ ҚОЛДАНБА БЕТТЕРІ */}
+      <main className="flex-1 p-4 md:p-8 max-w-7xl w-full mx-auto">
+
+        {/* =======================================================
+            БАСТЫ БЕТ (HOME)
+           ======================================================= */}
+        {activeTab === 'home' && (
+          <div className="space-y-8 animate-fadeIn">
+            {/* Басты баннер */}
+            <div className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-emerald-600 via-teal-800 to-slate-900 p-8 md:p-12 shadow-2xl">
+              <div className="absolute -top-10 -right-10 w-80 h-80 bg-emerald-400/10 rounded-full blur-3xl"></div>
+              <div className="relative z-10 max-w-3xl">
+                <span className="text-emerald-100 text-xs font-semibold tracking-wider uppercase bg-emerald-700/50 px-3 py-1 rounded-full border border-emerald-400/20">
+                  Зоология бағыты • Студенттік LMS
+                </span>
+                <h2 className="text-3xl md:text-5xl font-extrabold text-white mt-4 leading-tight">
+                  Орнитология саласына қош келдіңіздер!
+                </h2>
+                <p className="text-emerald-100/90 text-sm md:text-base mt-4 font-light leading-relaxed">
+                  "Qauyrsyn" заманауи платформасына қош келдіңіз. Мұнда сіз құстардың экологиясын, анатомиясын, ұшу физиологиясы мен ішкі жүйелерін 3D форматта зерттеп, интерактивті тесттер арқылы өз біліміңізді сынай аласыз.
+                </p>
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <button 
+                    onClick={() => setActiveTab('materials')} 
+                    className="bg-white hover:bg-slate-100 text-slate-950 px-6 py-3 rounded-xl font-bold transition flex items-center gap-2 shadow-lg"
+                  >
+                    <BookOpen className="w-5 h-5" />
+                    Дәрістерге көшу
+                  </button>
+                  <button 
+                    onClick={() => setActiveTab('3d')} 
+                    className="bg-slate-900/60 hover:bg-slate-900/90 text-white border border-emerald-500/30 px-6 py-3 rounded-xl font-bold transition flex items-center gap-2"
+                  >
+                    3D Зертхана
+                    <ChevronRight className="w-5 h-5 text-emerald-400" />
+                  </button>
                 </div>
+              </div>
             </div>
 
-            <!-- Scientists -->
+            {/* Басты беттегі үш ұяшық (Интерактивті карталар) */}
             <div>
-                <h3 class="text-xl font-bold mb-4 text-emerald-400 flex items-center gap-2">✨ Атақты ғалымдар мен зерттеушілер</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="scientists-container"></div>
+              <h3 className="text-xl font-bold mb-5 text-slate-200">Оқу модульдері мен деректер</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                {/* 1. Ғалымдар ұяшығы */}
+                <div className="bg-slate-900 border border-slate-800/80 p-6 rounded-2xl hover:border-emerald-500/40 transition group flex flex-col justify-between">
+                  <div>
+                    <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl w-fit group-hover:bg-emerald-500 group-hover:text-slate-950 transition-colors">
+                      <Users className="w-5 h-5" />
+                    </div>
+                    <h4 className="text-lg font-bold mt-4">Зерттеген ғалымдар</h4>
+                    <p className="text-slate-400 text-xs mt-2 leading-relaxed">
+                      Қазақстанның және әлемнің орнитология ғылымының негізін салған көрнекті зоологтар мен орнитологтар еңбегі.
+                    </p>
+                  </div>
+                  <button 
+                    onClick={() => setSelectedScientist(scientists[0])}
+                    className="mt-6 w-full bg-slate-800 hover:bg-slate-700/80 py-2.5 rounded-xl text-xs font-semibold transition"
+                  >
+                    Зерттеушілер базасы
+                  </button>
+                </div>
+
+                {/* 2.  Классификация ұяшығы */}
+                <div className="bg-slate-900 border border-slate-800/80 p-6 rounded-2xl hover:border-emerald-500/40 transition group flex flex-col justify-between">
+                  <div>
+                    <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl w-fit group-hover:bg-emerald-500 group-hover:text-slate-950 transition-colors">
+                      <Layers className="w-5 h-5" />
+                    </div>
+                    <h4 className="text-lg font-bold mt-4">Құстар классификациясы</h4>
+                    <p className="text-slate-400 text-xs mt-2 leading-relaxed">
+                      Құстар класының екі негізгі тармағы: Қырсыз төстілер (жүгіретіндер) мен Қырлы төстілер (ұшатындар).
+                    </p>
+                  </div>
+                  <button 
+                    onClick={() => setSelectedClass(classification[0])}
+                    className="mt-6 w-full bg-slate-800 hover:bg-slate-700/80 py-2.5 rounded-xl text-xs font-semibold transition"
+                  >
+                    Жүйелеуді ашу
+                  </button>
+                </div>
+
+                {/* 3. Қызықты деректер ұяшығы */}
+                <div className="bg-slate-900 border border-slate-800/80 p-6 rounded-2xl hover:border-emerald-500/40 transition group flex flex-col justify-between">
+                  <div>
+                    <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl w-fit group-hover:bg-emerald-500 group-hover:text-slate-950 transition-colors">
+                      <Info className="w-5 h-5" />
+                    </div>
+                    <h4 className="text-lg font-bold mt-4">Қызықты деректер</h4>
+                    <p className="text-slate-400 text-xs mt-2 leading-relaxed">
+                      Құстардың қос тыныс алу жүйесі, көру қабілеттері мен миграциялық магниттік сезімталдық құпиялары.
+                    </p>
+                  </div>
+                  <button 
+                    onClick={() => setSelectedFact(interestingFacts[0])}
+                    className="mt-6 w-full bg-slate-800 hover:bg-slate-700/80 py-2.5 rounded-xl text-xs font-semibold transition"
+                  >
+                    Деректермен танысу
+                  </button>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* =======================================================
+            1-БЕТ: МАТЕРИАЛДАР ЖӘНЕ ДӘРІСТЕР (LECTURES)
+           ======================================================= */}
+        {activeTab === 'materials' && (
+          <div className="space-y-6 animate-fadeIn">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-bold text-emerald-400">Лекциялар & Оқу материалдары</h2>
+                <p className="text-slate-400 text-xs">Тереңдетілген академиялық білім базасы мен жеке конспект жазу орталығы</p>
+              </div>
+              
+              {/* Іздеу */}
+              <div className="relative max-w-xs w-full">
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                <input 
+                  type="text" 
+                  placeholder="Материалдарды іздеу..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-10 pr-4 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition"
+                />
+              </div>
             </div>
 
-            <!-- Classification -->
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              {/* Сол жақ: Дәрістер тізімі */}
+              <div className="lg:col-span-4 space-y-3 max-h-[600px] overflow-y-auto pr-1">
+                {lectures
+                  .filter(lec => lec.title.toLowerCase().includes(searchQuery.toLowerCase()) || lec.short.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .map(lec => (
+                    <div 
+                      key={lec.id}
+                      onClick={() => setActiveLecture(lec)}
+                      className={`p-4 rounded-xl cursor-pointer border transition flex flex-col justify-between ${activeLecture?.id === lec.id ? 'bg-emerald-950/40 border-emerald-500/80' : 'bg-slate-900 border-slate-800 hover:border-slate-750'}`}
+                    >
+                      <div>
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">
+                            {lec.id.toUpperCase()}
+                          </span>
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleBookmark(lec.id);
+                            }}
+                            className="p-1 hover:bg-slate-800 rounded text-slate-400 hover:text-emerald-400"
+                          >
+                            <Bookmark className={`w-3.5 h-3.5 ${bookmarks.includes(lec.id) ? 'fill-emerald-400 text-emerald-400' : ''}`} />
+                          </button>
+                        </div>
+                        <h4 className="font-bold text-sm text-slate-200 mt-2 leading-tight">{lec.title}</h4>
+                        <p className="text-xs text-slate-400 mt-2 line-clamp-2">{lec.short}</p>
+                      </div>
+                    </div>
+                ))}
+              </div>
+
+              {/* Оң жақ: Дәріс оқу және конспект жазу */}
+              <div className="lg:col-span-8 space-y-6">
+                {activeLecture ? (
+                  <div className="space-y-6">
+                    {/* Лекция мазмұны */}
+                    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8">
+                      <span className="text-xs font-semibold text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+                        Оқу залы
+                      </span>
+                      <h3 className="text-2xl font-bold mt-4 mb-5 text-emerald-300">
+                        {activeLecture.title}
+                      </h3>
+                      <div className="text-slate-300 leading-relaxed whitespace-pre-wrap text-sm md:text-base font-light space-y-4">
+                        {activeLecture.content}
+                      </div>
+                    </div>
+
+                    {/* Интерактивті Конспект жазу блогы */}
+                    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                      <h4 className="font-bold text-slate-200 text-sm flex items-center gap-2 mb-3">
+                        <FileText className="w-4 h-4 text-emerald-400" />
+                        Бұл дәріс бойынша жеке студенттік конспектіңіз
+                      </h4>
+                      <p className="text-[11px] text-slate-400 mb-3">
+                        Жазған ойларыңыз немесе маңызды терминдер тек сіз үшін осы құрылғыда сақталады.
+                      </p>
+                      <textarea
+                        rows="4"
+                        value={currentNoteText}
+                        onChange={(e) => setCurrentNoteText(e.target.value)}
+                        placeholder="Осы дәріске қатысты өз түйгендеріңізді жазыңыз..."
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500 placeholder-slate-600 transition"
+                      ></textarea>
+                      <div className="mt-3 flex justify-end">
+                        <button 
+                          onClick={saveNote}
+                          className="bg-emerald-500 hover:bg-emerald-450 text-slate-950 font-bold px-4 py-2 rounded-lg text-xs transition"
+                        >
+                          Конспектіні сақтау
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center text-slate-500 flex flex-col items-center justify-center min-h-[400px]">
+                    <Book className="w-16 h-16 mb-4 text-slate-850 animate-pulse" />
+                    <p className="text-lg text-slate-400">Дәрісті таңдаңыз</p>
+                    <p className="text-xs text-slate-500 mt-2">Бастау үшін сол жақтағы дәрістердің біріне нұқыңыз.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* =======================================================
+            2-БЕТ: ТЕСТ ОРТАЛЫҒЫ (QUIZ)
+           ======================================================= */}
+        {activeTab === 'quiz' && (
+          <div className="space-y-6 animate-fadeIn">
             <div>
-                <h3 class="text-xl font-bold mb-4 text-cyan-400">📊 Құстардың негізгі жіктелуі (Классификация)</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="classification-container"></div>
-            </div>
-        </section>
-
-        <!-- MATERIALS TAB -->
-        <section id="tab-materials" class="tab-content hidden space-y-6">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="space-y-3" id="lectures-list"></div>
-                <div class="lg:col-span-2 cyber-card p-6 rounded-2xl space-y-4">
-                    <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                        <h2 id="active-lecture-title" class="text-xl font-bold text-emerald-400">Лекция таңдаңыз</h2>
-                        <button id="bookmark-btn" onclick="toggleBookmark()" class="text-slate-400 hover:text-amber-400">⭐ Бетбелгі</button>
-                    </div>
-                    <p id="active-lecture-content" class="text-slate-300 leading-relaxed whitespace-pre-line text-sm md:text-base"></p>
-                    <div class="border-t border-slate-800 pt-4 space-y-2">
-                        <label class="text-sm font-semibold text-emerald-400 block">📝 Жеке конспектіңіз:</label>
-                        <textarea id="lecture-note" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-slate-200 text-sm focus:outline-none focus:border-emerald-500 h-24" placeholder="Маңызды ақпаратты осында жазып қойыңыз..."></textarea>
-                        <button onclick="saveNote()" class="bg-emerald-500 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs hover:bg-emerald-400 transition-all">Сақтау</button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- QUIZ TAB -->
-        <section id="tab-quiz" class="tab-content hidden space-y-6">
-            <div id="quiz-selection" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-            <div id="quiz-window" class="hidden cyber-card p-6 rounded-2xl max-w-2xl mx-auto space-y-6">
-                <div class="flex justify-between items-center">
-                    <h3 id="quiz-window-title" class="font-bold text-emerald-400">Тест</h3>
-                    <span id="quiz-progress" class="text-xs bg-slate-800 px-3 py-1 rounded-full text-slate-400">Сұрақ: 1/3</span>
-                </div>
-                <div class="p-4 bg-slate-950 rounded-xl border border-slate-800">
-                    <p id="quiz-question-text" class="font-semibold text-base"></p>
-                </div>
-                <div id="quiz-options" class="flex flex-col gap-3"></div>
-                <button id="quiz-next-btn" onclick="nextQuestion()" class="w-full bg-emerald-500 text-slate-950 font-bold py-3 rounded-xl transition-all hover:bg-emerald-400">Келесі сұрақ →</button>
-            </div>
-        </section>
-
-        <!-- VIDEOS TAB -->
-        <section id="tab-videos" class="tab-content hidden space-y-6">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="lg:col-span-2 space-y-4">
-                    <div class="aspect-video bg-black rounded-2xl overflow-hidden relative border border-slate-800">
-                        <div class="absolute inset-0 flex items-center justify-center bg-slate-950/80" id="video-placeholder">
-                            <button onclick="playVideo()" class="w-16 h-16 bg-emerald-500 text-slate-950 rounded-full flex items-center justify-center text-2xl font-bold pl-1 hover:scale-105 transition-all shadow-lg">▶</button>
-                        </div>
-                        <video id="main-video-player" class="w-full h-full object-cover hidden" controls src="https://assets.mixkit.co/videos/preview/mixkit-flying-flock-of-white-birds-41618-large.mp4"></video>
-                    </div>
-                    <div class="cyber-card p-5 rounded-2xl">
-                        <h2 id="video-display-title" class="text-xl font-bold text-emerald-400">Видео сабақ</h2>
-                        <p id="video-display-lecturer" class="text-xs text-slate-400 mt-1">Оқытушы: </p>
-                        <p id="video-display-desc" class="text-sm text-slate-300 mt-3"></p>
-                    </div>
-                </div>
-                <!-- Comments Section -->
-                <div class="cyber-card p-5 rounded-2xl flex flex-col h-[450px]">
-                    <h3 class="font-bold border-b border-slate-800 pb-3 text-sm text-emerald-400">💬 Сұрақтар мен Пікірлер</h3>
-                    <div id="comments-container" class="flex-1 overflow-y-auto my-3 space-y-3 pr-2 text-xs"></div>
-                    <form onsubmit="addComment(event)" class="mt-auto pt-3 border-t border-slate-800 flex gap-2">
-                        <input type="text" id="comment-input" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500" placeholder="Пікір қалдыру...">
-                        <button type="submit" class="bg-emerald-500 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs hover:bg-emerald-400">Жіберу</button>
-                    </form>
-                </div>
-            </div>
-        </section>
-
-        <!-- 3D MODEL TAB -->
-        <section id="tab-model3d" class="tab-content hidden space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="cyber-card p-5 rounded-2xl space-y-3">
-                    <h3 class="font-bold text-emerald-400 text-base">🧬 Микроқұрылым элементтері</h3>
-                    <button onclick="select3D('calamus')" class="w-full text-left p-3 rounded-xl border border-slate-800 hover:border-emerald-500 transition-all bg-slate-950" id="btn-3d-calamus">
-                        <span class="font-bold text-sm block">1. Қаламша (Calamus)</span>
-                        <span class="text-xs text-slate-400">Тері ішіне еніп тұратын қуыс, мөлдір бөлігі.</span>
-                    </button>
-                    <button onclick="select3D('rachis')" class="w-full text-left p-3 rounded-xl border border-slate-800 hover:border-emerald-500 transition-all bg-slate-950" id="btn-3d-rachis">
-                        <span class="font-bold text-sm block">2. Дің (Rachis)</span>
-                        <span class="text-xs text-slate-400">Қауырсынның өзегі болып табылатын орталық бөлігі.</span>
-                    </button>
-                    <button onclick="select3D('barbs')" class="w-full text-left p-3 rounded-xl border border-slate-800 hover:border-emerald-500 transition-all bg-slate-950" id="btn-3d-barbs">
-                        <span class="font-bold text-sm block">3. Мұртшалар мен Ілмектер</span>
-                        <span class="text-xs text-slate-400">Ауа өткізбейтін берік жазықтықты құрайтын микро-құрылым.</span>
-                    </button>
-                </div>
-                <!-- Visual Container Simulated -->
-                <div class="md:col-span-2 cyber-card rounded-2xl p-6 flex flex-col justify-between items-center relative h-[400px] overflow-hidden">
-                    <span class="absolute top-4 left-4 text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-full">Интерактивті 3D модель тренажеры</span>
-                    
-                    <div class="w-full flex-1 flex justify-center items-center">
-                        <!-- Simulated Cyber Graphic -->
-                        <div class="text-center space-y-4">
-                            <div class="text-6xl animate-bounce">🪶</div>
-                            <div class="border border-emerald-500/30 p-4 rounded-xl bg-slate-950 text-emerald-400 max-w-sm font-mono text-xs shadow-lg shadow-emerald-500/5" id="3d-display-info">
-                                Қауырсынның құрылымы жүктелуде...
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- GRADES TAB -->
-        <section id="tab-grades" class="tab-content hidden space-y-6">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <h2 class="text-xl font-bold text-emerald-400">📊 Студенттерді бағалау және бақылау журналы</h2>
-                <form onsubmit="addStudent(event)" class="flex gap-2 w-full md:w-auto">
-                    <input type="text" id="new-student-name" placeholder="Жаңа студент аты-жөні..." class="bg-slate-900 border border-slate-800 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-emerald-500 flex-1 md:w-64" required>
-                    <button type="submit" class="bg-emerald-500 text-slate-950 font-bold px-4 py-2 rounded-xl text-sm hover:bg-emerald-400 transition-all">+ Студент</button>
-                </form>
+              <h2 className="text-2xl font-bold text-emerald-400">Модульдік тест орталығы</h2>
+              <p className="text-slate-400 text-xs">Жалпы 10 нұсқадан тұратын білім бағалау тестілеуі</p>
             </div>
 
-            <div class="overflow-x-auto cyber-card rounded-2xl border border-slate-800">
-                <table class="w-full text-left text-sm">
-                    <thead class="bg-slate-900 text-slate-400 text-xs uppercase tracking-wider border-b border-slate-800">
-                        <tr>
-                            <th class="p-4">Студент</th>
-                            <th class="p-4">Топ</th>
-                            <th class="p-4 text-center">01.09</th>
-                            <th class="p-4 text-center">08.09</th>
-                            <th class="p-4 text-center">15.09</th>
-                            <th class="p-4 text-center">22.09</th>
-                            <th class="p-4 text-center">29.09</th>
-                            <th class="p-4">Тест балдары</th>
-                        </tr>
-                    </thead>
-                    <tbody id="grades-table-body" class="divide-y divide-slate-800"></tbody>
-                </table>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- JS LOGIC INTEGRATION -->
-    <script>
-        // Data Bases
-        const scientists = [
-            { id: 'sc1', name: 'Михаил Николаевич Долгушин', years: '1908 — 1974', avatar: '🦅', achievement: 'Қазақстан орнитология мектебінің негізін салушылардың бірі. 5 томдық "Қазақстан құстары" монографиясының авторы.' },
-            { id: 'sc2', name: 'Анатолий Федорович Ковшар', years: '1937 ж.т.', avatar: '🔬', achievement: 'Атақты қазақстандық орнитолог, биология ғылымдарының докторы. Қазақстан құстарын қорғау одағының негізін қалаушы.' },
-            { id: 'sc3', name: 'Альфред Брем', years: '1829 — 1884', avatar: '📚', achievement: 'Әйгілі неміс зоологы, орнитолог. "Жануарлар тіршілігі" (Tierleben) атты энциклопедиялық еңбектің авторы.' }
-        ];
-
-        const classification = [
-            { order: 'Paleognathae (Қырсыз төстілер)', traits: 'Төс сүйегінде қыры болмайды, ұша алмайды. Аяқтары жүгіруге бейімделген.', examples: 'Түйеқұстар, Киви, Эму.' },
-            { order: 'Neognathae (Қырлы төстілер)', traits: 'Төс сүйегінің қыры (киль) жақсы жетілген. Ұшу бұлшықеттері өте күшті.', examples: 'Қазіргі құстардың 99%-ы кіреді.' }
-        ];
-
-        const lectures = [
-            { id: 'lec1', title: 'Лекция 1: Орнитология пәні және құстардың шығу тегі', content: `Орнитология — зоология ғылымының құстарды зерттейтін маңызды саласы.\n\nЗаманауи палеонтологиялық деректер құстардың мезозой эрасында өмір сүрген тераподты динозаврлардан (Theropoda) шыққанын толық дәлелдейді.\n\nЕң танымал өтпелі форма — Археоптерикс (Archaeopteryx). Оның құрылысында бауырымен жорғалаушылардың және құстардың белгілері қатар кездеседі.` },
-            { id: 'lec2', title: 'Лекция 2: Құстардың анатомиясы мен морфологиясы', content: `Тері жабыны өте жұқа, құрғақ әрі безсіз келеді. Құстардағы жалғыз тері безі — құйрық түбінде орналасқан құйымшақ безі (копчиковая железа).\n\nҚаңқа жүйесі ерекше берік әрі жеңіл. Сүйектердің іші қуыс (пневматизация).` }
-        ];
-
-        const videoLessons = [
-            { id: 'v1', title: 'Құс қаңқасы мен ұшу физиологиясы', lecturer: 'Доцент С. Сейітбатталов', desc: 'Бейнедәрісте құс қаңқасының ішкі қуыстары және ұшу кезіндегі бұлшықет жұмысы нақты сызбалармен көрсетіледі.', comments: [{author: 'Данияр', text: 'Керемет түсіндірілген! Рақмет!'}, {author: 'Айгерім', text: 'Өте пайдалы мәлімет.'}] }
-        ];
-
-        const quizVariants = [
-            { id: 1, title: '1-нұсқа: Шығу тегі мен эволюциясы', questions: [
-                { q: 'Құстардың қай динозаврлар тобынан шыққандығы ғылыми дәлелденген?', options: ['Зауроподтар', 'Тераподтар', 'Птерозаврлар'], answer: 1 },
-                { q: 'Археоптерикстің құстарға тән белгісі қандай?', options: ['Тістерінің болуы', 'Қауырсын жамылғысы', 'Ұзын сүйекті құйрық'], answer: 1 }
-            ]}
-        ];
-
-        let students = [
-            { id: 1, name: 'Әлібек Сұлтанов', group: 'БИО-23-01', attendance: [true, true, true, false, true], quizScores: [85, 90] },
-            { id: 2, name: 'Айгерім Даниярқызы', group: 'БИО-23-01', attendance: [true, true, true, true, true], quizScores: [100, 95] },
-            { id: 3, name: 'Мадина Оспанова', group: 'БИО-23-02', attendance: [true, true, false, true, true], quizScores: [90, 85] }
-        ];
-
-        let activeLecture = lectures[0];
-        let activeQuiz = null;
-        let activeQuestionIdx = 0;
-        let userAnswers = {};
-
-        // Notification Helper
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            document.getElementById('toast-msg').innerText = msg;
-            toast.classList.remove('hidden');
-            setTimeout(() => toast.classList.add('hidden'), 3000);
-        }
-
-        // Tab Switcher
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active-tab'));
-            
-            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
-            document.getElementById(`btn-${tabId}`).classList.add('active-tab');
-        }
-
-        // Home View Renders
-        function initHome() {
-            const sciCont = document.getElementById('scientists-container');
-            sciCont.innerHTML = scientists.map(s => `
-                <div class="cyber-card p-5 rounded-2xl space-y-2">
-                    <div class="text-3xl">${s.avatar}</div>
-                    <h4 class="font-bold text-emerald-400 text-sm">${s.name}</h4>
-                    <span class="text-xs text-slate-500 block">${s.years}</span>
-                    <p class="text-xs text-slate-300 leading-relaxed">${s.achievement}</p>
-                </div>
-            `).join('');
-
-            const classCont = document.getElementById('classification-container');
-            classCont.innerHTML = classification.map(c => `
-                <div class="cyber-card p-5 rounded-2xl border-l-4 border-cyan-500">
-                    <h4 class="font-bold text-cyan-400 text-base mb-1">${c.order}</h4>
-                    <p class="text-xs text-slate-300 mb-2">${c.traits}</p>
-                    <span class="text-xs bg-slate-900 px-2.5 py-1 rounded-md text-slate-400">Мысалы: ${c.examples}</span>
-                </div>
-            `).join('');
-        }
-
-        // Lectures View Renders
-        function initLectures() {
-            const list = document.getElementById('lectures-list');
-            list.innerHTML = lectures.map(l => `
-                <button onclick="selectLecture('${l.id}')" class="w-full text-left p-4 rounded-xl border border-slate-800 hover:border-emerald-500/50 transition-all bg-slate-900/40 block">
-                    <span class="font-bold text-xs text-emerald-400 block mb-1">Тақырыптық лекция</span>
-                    <span class="text-sm font-semibold text-slate-200">${l.title}</span>
-                </button>
-            `).join('');
-            selectLecture(activeLecture.id);
-        }
-
-        function selectLecture(id) {
-            activeLecture = lectures.find(l => l.id === id);
-            document.getElementById('active-lecture-title').innerText = activeLecture.title;
-            document.getElementById('active-lecture-content').innerText = activeLecture.content;
-            document.getElementById('lecture-note').value = localStorage.getItem(`note_${id}`) || '';
-        }
-
-        function saveNote() {
-            const txt = document.getElementById('lecture-note').value;
-            localStorage.setItem(`note_${activeLecture.id}`, txt);
-            showToast('Конспект сәтті сақталды!');
-        }
-
-        function toggleBookmark() {
-            showToast('Бетбелгілер тізіміне қосылды!');
-        }
-
-        // Quiz Logic
-        function initQuiz() {
-            const cont = document.getElementById('quiz-selection');
-            cont.innerHTML = quizVariants.map(q => `
-                <div class="cyber-card p-5 rounded-2xl flex justify-between items-center">
+            {!selectedVariant ? (
+              // Нұсқаларды таңдау
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {quizVariants.map((variant) => (
+                  <div 
+                    key={variant.id}
+                    className="bg-slate-900 border border-slate-800 rounded-2xl p-5 hover:border-emerald-500/40 transition flex flex-col justify-between"
+                  >
                     <div>
-                        <h4 class="font-bold text-sm text-slate-200">${q.title}</h4>
-                        <span class="text-xs text-slate-500">Мөлшері: ${q.questions.length} сұрақ</span>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">
+                          {variant.questions.length} Сұрақ
+                        </span>
+                        <span className="text-xs text-slate-500">Нұсқа #{variant.id}</span>
+                      </div>
+                      <h3 className="text-base font-bold mt-3 text-slate-200">{variant.title}</h3>
                     </div>
-                    <button onclick="startQuiz(${q.id})" class="bg-emerald-500 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs hover:bg-emerald-400">Бастау</button>
+                    <button 
+                      onClick={() => startQuiz(variant)}
+                      className="mt-6 w-full bg-emerald-500 hover:bg-emerald-450 text-slate-950 font-bold py-2.5 rounded-xl transition text-xs"
+                    >
+                      Тестті бастау
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              // Тест орындау интерфейсі
+              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8 max-w-2xl mx-auto">
+                <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-6">
+                  <h3 className="font-bold text-slate-200 text-sm">{selectedVariant.title}</h3>
+                  <button 
+                    onClick={() => setSelectedVariant(null)}
+                    className="p-1 hover:bg-slate-800 rounded text-slate-400 hover:text-white"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
                 </div>
-            `).join('');
-        }
 
-        function startQuiz(id) {
-            activeQuiz = quizVariants.find(q => q.id === id);
-            activeQuestionIdx = 0;
-            userAnswers = {};
-            document.getElementById('quiz-selection').classList.add('hidden');
-            document.getElementById('quiz-window').classList.remove('hidden');
-            renderQuestion();
-        }
+                {!quizFinished ? (
+                  <div>
+                    {/* Прогресс-бар */}
+                    <div className="w-full bg-slate-800 h-1.5 rounded-full mb-6 overflow-hidden">
+                      <div 
+                        className="bg-emerald-500 h-full transition-all duration-300"
+                        style={{ width: `${((currentQuestionIndex + 1) / selectedVariant.questions.length) * 100}%` }}
+                      ></div>
+                    </div>
 
-        function renderQuestion() {
-            const q = activeQuiz.questions[activeQuestionIdx];
-            document.getElementById('quiz-window-title').innerText = activeQuiz.title;
-            document.getElementById('quiz-progress').innerText = `Сұрақ: ${activeQuestionIdx + 1}/${activeQuiz.questions.length}`;
-            document.getElementById('quiz-question-text').innerText = q.q;
+                    <span className="text-xs text-slate-500">
+                      Сұрақ {currentQuestionIndex + 1} / {selectedVariant.questions.length}
+                    </span>
 
-            const optCont = document.getElementById('quiz-options');
-            optCont.innerHTML = q.options.map((opt, idx) => `
-                <button onclick="selectOption(${idx})" class="w-full text-left p-3 rounded-xl border border-slate-800 bg-slate-950/60 text-xs hover:border-emerald-500 transition-all ${userAnswers[activeQuestionIdx] === idx ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400' : ''}">
-                    ${opt}
-                </button>
-            `).join('');
-        }
+                    <h4 className="text-base font-medium text-slate-200 mt-2 mb-6">
+                      {selectedVariant.questions[currentQuestionIndex].q}
+                    </h4>
 
-        function selectOption(idx) {
-            userAnswers[activeQuestionIdx] = idx;
-            renderQuestion();
-        }
+                    {/* Жауаптар */}
+                    <div className="space-y-3 mb-6">
+                      {selectedVariant.questions[currentQuestionIndex].options.map((opt, oIdx) => (
+                        <button
+                          key={oIdx}
+                          onClick={() => selectAnswer(currentQuestionIndex, oIdx)}
+                          className={`w-full text-left p-4 rounded-xl border text-sm transition flex items-center justify-between ${userAnswers[currentQuestionIndex] === oIdx ? 'bg-emerald-500/10 border-emerald-500 text-emerald-300' : 'bg-slate-950 border-slate-800 hover:bg-slate-800/50 text-slate-300'}`}
+                        >
+                          <span>{opt}</span>
+                          <span className={`w-4 h-4 rounded-full border flex items-center justify-center ${userAnswers[currentQuestionIndex] === oIdx ? 'border-emerald-500 bg-emerald-500 text-slate-950' : 'border-slate-600'}`}>
+                            {userAnswers[currentQuestionIndex] === oIdx && <Check className="w-3 h-3 stroke-[3]" />}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
 
-        function nextQuestion() {
-            if (userAnswers[activeQuestionIdx] === undefined) {
-                showToast('Жауапты таңдаңыз!');
-                return;
-            }
-            if (activeQuestionIdx < activeQuiz.questions.length - 1) {
-                activeQuestionIdx++;
-                renderQuestion();
-            } else {
-                showToast('Тест аяқталды! Сәтті қорытындыланды.');
-                document.getElementById('quiz-selection').classList.remove('hidden');
-                document.getElementById('quiz-window').classList.add('hidden');
-            }
-        }
+                    <button
+                      onClick={nextQuestion}
+                      disabled={userAnswers[currentQuestionIndex] === undefined}
+                      className="w-full bg-emerald-500 hover:bg-emerald-450 disabled:bg-slate-850 disabled:text-slate-600 disabled:cursor-not-allowed text-slate-950 font-bold py-3 rounded-xl transition text-xs shadow-lg shadow-emerald-500/10"
+                    >
+                      {currentQuestionIndex === selectedVariant.questions.length - 1 ? 'Тестті аяқтау' : 'Келесі сұрақ'}
+                    </button>
+                  </div>
+                ) : (
+                  // Қорытынды нәтиже
+                  <div className="text-center py-4 animate-scaleUp">
+                    <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-5 border border-emerald-500/25">
+                      <CheckCircle2 className="w-8 h-8 text-emerald-400" />
+                    </div>
+                    <h4 className="text-xl font-bold text-slate-100">Нәтижеңіз дайын!</h4>
+                    <p className="text-xs text-slate-400 mt-1">Орташа баға журналға автоматты түрде қосылды.</p>
 
-        // Video Controller
-        function initVideos() {
-            const v = videoLessons[0];
-            document.getElementById('video-display-title').innerText = v.title;
-            document.getElementById('video-display-lecturer').innerText = `Оқытушы: ${v.lecturer}`;
-            document.getElementById('video-display-desc').innerText = v.desc;
-            renderComments();
-        }
+                    <div className="bg-slate-950 border border-slate-850 rounded-2xl p-6 max-w-xs mx-auto my-6">
+                      <span className="text-[10px] text-slate-500 uppercase tracking-widest">Алынған балл</span>
+                      <div className="text-4xl font-extrabold text-emerald-400 mt-1">{quizScore}%</div>
+                      <div className="text-xs text-slate-400 mt-2">
+                        {quizScore >= 90 ? 'Үздік баға (А)' : quizScore >= 70 ? 'Жақсы баға (B)' : quizScore >= 50 ? 'Қанағаттанарлық (C)' : 'Қайта тапсыру қажет (D)'}
+                      </div>
+                    </div>
 
-        function playVideo() {
-            document.getElementById('video-placeholder').classList.add('hidden');
-            const player = document.getElementById('main-video-player');
-            player.classList.remove('hidden');
-            player.play();
-        }
+                    {/* Сұрақтар түсіндірмесі */}
+                    <div className="space-y-3 text-left max-h-52 overflow-y-auto mb-6 bg-slate-950 border border-slate-850 rounded-xl p-4">
+                      <h5 className="font-bold text-xs text-slate-300">Дұрыс жауаптарды талдау:</h5>
+                      {selectedVariant.questions.map((q, idx) => (
+                        <div key={idx} className="text-xs border-b border-slate-800 pb-2.5 last:border-0 last:pb-0">
+                          <p className="font-semibold text-slate-300">{idx+1}. {q.q}</p>
+                          <p className="text-emerald-400 mt-1">✓ Түсініктеме: {q.desc}</p>
+                        </div>
+                      ))}
+                    </div>
 
-        function renderComments() {
-            const cont = document.getElementById('comments-container');
-            cont.innerHTML = videoLessons[0].comments.map(c => `
-                <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-900">
-                    <span class="font-bold text-emerald-400 block mb-0.5">${c.author}:</span>
-                    <p class="text-slate-300">${c.text}</p>
+                    <button
+                      onClick={() => setSelectedVariant(null)}
+                      className="bg-slate-800 hover:bg-slate-700 text-slate-300 px-5 py-2.5 rounded-lg text-xs font-semibold transition"
+                    >
+                      Мәзірге оралу
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* =======================================================
+            3-БЕТ: БЕЙНЕ САБАҚТАР (VIDEOS)
+           ======================================================= */}
+        {activeTab === 'videos' && (
+          <div className="space-y-6 animate-fadeIn">
+            <div>
+              <h2 className="text-2xl font-bold text-emerald-400">Бейне-оқу залы</h2>
+              <p className="text-slate-400 text-xs">Практикалық орнитология және микроскопия бойынша көрнекі бейнедәрістер</p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              {/* Бейнеойнатқыш пен пікірлер */}
+              <div className="lg:col-span-8 space-y-5">
+                <div className="relative aspect-video rounded-2xl overflow-hidden bg-slate-900 border border-slate-800 shadow-xl flex items-center justify-center">
+                  {videoPlaying ? (
+                    <video 
+                      src={currentVideo.videoUrl} 
+                      controls 
+                      autoPlay 
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-slate-950/80 flex flex-col items-center justify-center p-6 text-center">
+                      <div className="w-14 h-14 bg-emerald-500 hover:bg-emerald-450 text-slate-950 rounded-full flex items-center justify-center cursor-pointer shadow-lg transition transform hover:scale-105" onClick={() => setVideoPlaying(true)}>
+                        <Play className="w-7 h-7 fill-current ml-1" />
+                      </div>
+                      <h3 className="text-base font-bold mt-4 text-slate-100">{currentVideo.title}</h3>
+                      <p className="text-xs text-slate-400 mt-1">{currentVideo.lecturer}</p>
+                    </div>
+                  )}
                 </div>
-            `).join('');
-        }
 
-        function addComment(e) {
-            e.preventDefault();
-            const inp = document.getElementById('comment-input');
-            if(!inp.value.trim()) return;
-            videoLessons[0].comments.push({ author: 'Студент', text: inp.value });
-            inp.value = '';
-            renderComments();
-            showToast('Пікір қосылды!');
-        }
+                {/* Сипаттамасы */}
+                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-md">
+                      Дәріс бейнесі
+                    </span>
+                    <span className="text-xs text-slate-500">Ұзақтығы: {currentVideo.duration}</span>
+                  </div>
+                  <h3 className="text-lg font-bold text-slate-200">{currentVideo.title}</h3>
+                  <p className="text-xs text-slate-400">Оқытушы: <span className="text-emerald-400">{currentVideo.lecturer}</span></p>
+                  <p className="text-slate-300 text-xs mt-3 leading-relaxed border-t border-slate-800 pt-3">
+                    {currentVideo.desc}
+                  </p>
+                </div>
 
-        // 3D Logic simulation
-        function select3D(part) {
-            document.querySelectorAll('[id^="btn-3d-"]').forEach(btn => btn.classList.remove('border-emerald-500'));
-            document.getElementById(`btn-3d-${part}`).classList.add('border-emerald-500');
+                {/* Пікірлер мен Сұрақ-жауап */}
+                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
+                  <h4 className="font-bold text-slate-200 text-sm">Сұрақтар мен талқылаулар ({currentVideo.comments?.length || 0})</h4>
+                  
+                  {/* Пікірлер тізімі */}
+                  <div className="space-y-3 max-h-40 overflow-y-auto pr-1">
+                    {currentVideo.comments && currentVideo.comments.length > 0 ? (
+                      currentVideo.comments.map((comm, idx) => (
+                        <div key={idx} className="bg-slate-950/50 p-3 rounded-xl border border-slate-850">
+                          <div className="flex justify-between text-[11px] font-medium text-emerald-400 mb-1">
+                            <span>{comm.author}</span>
+                            <span className="text-slate-600">Оқушы</span>
+                          </div>
+                          <p className="text-xs text-slate-300">{comm.text}</p>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-xs text-slate-500 py-2">Әзірге сұрақтар жоқ. Алғашқы болып сұрақ қойыңыз!</p>
+                    )}
+                  </div>
+
+                  {/* Сұрақ қою формасы */}
+                  <form onSubmit={handleAddComment} className="flex gap-2">
+                    <input 
+                      type="text" 
+                      placeholder="Осы сабақ бойынша сұрақ немесе пікір жазыңыз..."
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                      className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 placeholder-slate-650 focus:outline-none focus:border-emerald-500 transition"
+                    />
+                    <button 
+                      type="submit"
+                      className="bg-emerald-500 hover:bg-emerald-450 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs transition"
+                    >
+                      Жіберу
+                    </button>
+                  </form>
+                </div>
+              </div>
+
+              {/* Бейнелер плейлисті */}
+              <div className="lg:col-span-4 space-y-3">
+                <h4 className="font-bold text-slate-300 text-sm px-1">Басқа тақырыптар</h4>
+                <div className="space-y-3">
+                  {videoList.map((vid) => (
+                    <div 
+                      key={vid.id}
+                      onClick={() => {
+                        setCurrentVideo(vid);
+                        setVideoPlaying(false);
+                      }}
+                      className={`p-3.5 rounded-xl border transition cursor-pointer flex gap-3 ${currentVideo.id === vid.id ? 'bg-emerald-950/30 border-emerald-500' : 'bg-slate-900 border-slate-800 hover:border-slate-750'}`}
+                    >
+                      <div className="w-10 h-10 rounded-lg bg-slate-850 flex items-center justify-center flex-shrink-0 text-emerald-400">
+                        <Play className="w-4 h-4 fill-current" />
+                      </div>
+                      <div className="min-w-0">
+                        <h5 className="font-bold text-xs text-slate-200 truncate">{vid.title}</h5>
+                        <p className="text-[10px] text-slate-400 truncate">{vid.lecturer}</p>
+                        <span className="text-[9px] text-slate-500">{vid.duration}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* =======================================================
+            4-БЕТ: 3D МОДЕЛЬ (3D FEATHER) - Скетчфаб интеграциясымен
+           ======================================================= */}
+        {activeTab === '3d' && (
+          <div className="space-y-6 animate-fadeIn">
+            <div>
+              <h2 className="text-2xl font-bold text-emerald-400">3D Анатомия зертханасы</h2>
+              <p className="text-slate-400 text-xs">Sketchfab ұсынған құстың қаңқасы мен мүшелерінің интерактивті 3D моделі</p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              {/* 3D Sketchfab iframe аймағы */}
+              <div className="lg:col-span-8 bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden relative min-h-[480px] flex flex-col shadow-2xl">
+                <div className="absolute top-4 left-4 z-10 bg-slate-950/90 border border-slate-850 px-3 py-1.5 rounded-xl text-xs flex items-center gap-2">
+                  <RotateCw className="w-3.5 h-3.5 text-emerald-400 animate-spin" style={{ animationDuration: '8s' }} />
+                  <span>3D модельді айналдыру және жақындату тінтуірмен/сенсормен орындалады</span>
+                </div>
+
+                <div className="flex-1 w-full relative h-[480px]">
+                  <iframe 
+                    title="Qauyrsyn 3D Bird Model"
+                    className="w-full h-full border-0"
+                    src="https://sketchfab.com/models/6RGQV/embed?autostart=1&preload=1&theme=dark"
+                    allow="autoplay; fullscreen; xr-spatial-tracking"
+                    allowFullScreen
+                  ></iframe>
+                </div>
+              </div>
+
+              {/* Құрылымды таңдау және сипаттама панелі */}
+              <div className="lg:col-span-4 bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
+                <div>
+                  <h3 className="font-bold text-sm text-slate-200 mb-4 pb-2 border-b border-slate-800 flex items-center gap-2">
+                    <Info className="w-4 h-4 text-emerald-400" />
+                    Құс қаңқасы мен анатомиясы
+                  </h3>
+
+                  <div className="space-y-3">
+                    <button 
+                      onClick={() => setSelected3DPart('calamus')}
+                      className={`w-full text-left p-3.5 rounded-xl border text-xs transition ${selected3DPart === 'calamus' ? 'bg-cyan-500/10 border-cyan-500 text-cyan-300' : 'bg-slate-950 border-slate-800 hover:bg-slate-800/50 text-slate-300'}`}
+                    >
+                      <div className="font-bold">1. Қаңқаның беріктігі мен жеңілдігі</div>
+                      <div className="text-[11px] text-slate-400 mt-1">Омыртқалардың бірігуі мен пневматизация.</div>
+                    </button>
+
+                    <button 
+                      onClick={() => setSelected3DPart('rachis')}
+                      className={`w-full text-left p-3.5 rounded-xl border text-xs transition ${selected3DPart === 'rachis' ? 'bg-emerald-500/10 border-emerald-500 text-emerald-300' : 'bg-slate-950 border-slate-800 hover:bg-slate-800/50 text-slate-300'}`}
+                    >
+                      <div className="font-bold">2. Төс сүйегінің қыры (Киль)</div>
+                      <div className="text-[11px] text-slate-400 mt-1">Ұшу бұлшықеттері бекитін негізгі аймақ.</div>
+                    </button>
+
+                    <button 
+                      onClick={() => setSelected3DPart('vane')}
+                      className={`w-full text-left p-3.5 rounded-xl border text-xs transition ${selected3DPart === 'vane' ? 'bg-emerald-500/10 border-emerald-500 text-emerald-300' : 'bg-slate-950 border-slate-800 hover:bg-slate-800/50 text-slate-300'}`}
+                    >
+                      <div className="font-bold">3. Қанат қаңқасының құрылымы</div>
+                      <div className="text-[11px] text-slate-400 mt-1">Редукцияланған бақай және білек сүйектері.</div>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="mt-5 bg-slate-950 border border-slate-850 rounded-xl p-4">
+                  {selected3DPart === 'calamus' && (
+                    <div className="text-xs">
+                      <span className="font-bold text-cyan-400">Қаңқа жеңілдігі (Пневматизация):</span>
+                      <p className="text-slate-300 mt-1 leading-relaxed">
+                        Құс сүйектерінің іші кеуекті, ауаға толы қуыстардан тұрады. Бұл ұшу кезінде салмақты мейлінше азайту үшін маңызды эволюциялық бейімделу болып табылады.
+                      </p>
+                    </div>
+                  )}
+                  {selected3DPart === 'rachis' && (
+                    <div className="text-xs">
+                      <span className="font-bold text-emerald-400">Киль маңызы:</span>
+                      <p className="text-slate-300 mt-1 leading-relaxed">
+                        Төс сүйегіндегі үлкен өсінді. Оған қанатты қозғалысқа келтіретін ең ірі кеуде бұлшықеттері бекиді. Ұша алмайтын құстарда бұл өсінді нашар дамиды.
+                      </p>
+                    </div>
+                  )}
+                  {selected3DPart === 'vane' && (
+                    <div className="text-xs">
+                      <span className="font-bold text-emerald-400">Қанат сүйектерінің өзгеруі:</span>
+                      <p className="text-slate-300 mt-1 leading-relaxed">
+                        Ұшуға байланысты құс қанатының ұшындағы сүйектер бірігіп, редукцияға ұшыраған. Бұл қанаттың ұшу кезіндегі беріктігі мен тұрақтылығын арттырады.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* =======================================================
+            5-БЕТ: БАҒАЛАУ ЖӘНЕ СТУДЕНТТЕРДІ БАҚЫЛАУ (GRADES)
+           ======================================================= */}
+        {activeTab === 'grades' && (
+          <div className="space-y-6 animate-fadeIn">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-bold text-emerald-400">Электронды бағалау журналы</h2>
+                <p className="text-slate-400 text-xs">Студенттердің тест нәтижелерін бақылау және сабаққа қатысуын басқару журналы</p>
+              </div>
+
+              {/* Сүзгілеу */}
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-slate-400">Сүзгіден өткізу:</span>
+                <select 
+                  value={selectedGroupFilter}
+                  onChange={(e) => setSelectedGroupFilter(e.target.value)}
+                  className="bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-emerald-500"
+                >
+                  <option value="All">Барлық топтар</option>
+                  <option value="БИО-23-01">БИО-23-01</option>
+                  <option value="БИО-23-02">БИО-23-02</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Статистика */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-slate-900 border border-slate-850 rounded-xl p-4 flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] text-slate-400">Белсенді студент саны</span>
+                  <h4 className="text-xl font-bold text-emerald-400 mt-1">
+                    {students.filter(s => s.active).length} студент
+                  </h4>
+                </div>
+                <Users className="w-6 h-6 text-slate-700" />
+              </div>
+
+              <div className="bg-slate-900 border border-slate-850 rounded-xl p-4 flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] text-slate-400">Орташа GPA көрсеткіші</span>
+                  <h4 className="text-xl font-bold text-emerald-400 mt-1">
+                    {Math.round(students.reduce((acc, std) => acc + (std.quizScores.reduce((a,b)=>a+b, 0) / std.quizScores.length), 0) / students.length)}%
+                  </h4>
+                </div>
+                <TrendingUp className="w-6 h-6 text-slate-700" />
+              </div>
+
+              <div className="bg-slate-900 border border-slate-850 rounded-xl p-4 flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] text-slate-400">Аралық қатысу (Attendance)</span>
+                  <h4 className="text-xl font-bold text-emerald-400 mt-1">
+                    {Math.round((students.reduce((acc, std) => acc + std.attendance.filter(v => v).length, 0) / (students.length * 5)) * 100)}%
+                  </h4>
+                </div>
+                <CheckCircle2 className="w-6 h-6 text-slate-700" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              {/* Кесте */}
+              <div className="lg:col-span-8 bg-slate-900 border border-slate-800 rounded-2xl p-5 overflow-x-auto">
+                <table className="w-full text-left border-collapse min-w-[550px]">
+                  <thead>
+                    <tr className="border-b border-slate-850 text-[10px] text-slate-500 uppercase">
+                      <th className="py-2.5 px-3">Аты-жөні</th>
+                      <th className="py-2.5 px-3">Тобы</th>
+                      <th className="py-2.5 px-3 text-center">Қатысуы (5 апта)</th>
+                      <th className="py-2.5 px-3 text-center">Орташа балл</th>
+                      <th className="py-2.5 px-3 text-right">Әрекет</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-850 text-xs">
+                    {students
+                      .filter(std => selectedGroupFilter === 'All' || std.group === selectedGroupFilter)
+                      .map((student) => {
+                        const avgScore = Math.round(student.quizScores.reduce((a, b) => a + b, 0) / student.quizScores.length);
+                        return (
+                          <tr key={student.id} className={`hover:bg-slate-850/30 transition ${!student.active ? 'opacity-40' : ''}`}>
+                            <td className="py-3 px-3 font-semibold text-slate-200">{student.name}</td>
+                            <td className="py-3 px-3 text-slate-400">{student.group}</td>
+                            <td className="py-3 px-3">
+                              <div className="flex items-center justify-center gap-1">
+                                {student.attendance.map((val, idx) => (
+                                  <button
+                                    key={idx}
+                                    onClick={() => toggleAttendance(student.id, idx)}
+                                    title={`${dates[idx]} күніне қатысуын өзгерту`}
+                                    className={`w-6 h-6 rounded flex items-center justify-center text-[9px] font-bold transition ${val ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400' : 'bg-slate-950 border border-slate-850 text-slate-600'}`}
+                                  >
+                                    {val ? 'Қ' : 'Ж'}
+                                  </button>
+                                ))}
+                              </div>
+                            </td>
+                            <td className="py-3 px-3 text-center">
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${avgScore >= 85 ? 'bg-emerald-500/10 text-emerald-400' : avgScore >= 65 ? 'bg-cyan-500/10 text-cyan-400' : 'bg-amber-500/10 text-amber-400'}`}>
+                                {avgScore}%
+                              </span>
+                            </td>
+                            <td className="py-3 px-3 text-right">
+                              <button 
+                                onClick={() => toggleStudentStatus(student.id, student.name)}
+                                className={`text-[10px] px-2.5 py-1 rounded transition ${student.active ? 'border border-slate-800 text-slate-400 hover:bg-slate-800' : 'border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10'}`}
+                              >
+                                {student.active ? 'Архив' : 'Қалпына келтіру'}
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Студент қосу формасы */}
+              <div className="lg:col-span-4 bg-slate-900 border border-slate-800 rounded-2xl p-5 h-fit">
+                <h4 className="font-bold text-slate-200 text-sm mb-4 pb-2 border-b border-slate-800 flex items-center gap-2">
+                  <UserPlus className="w-4 h-4 text-emerald-400" />
+                  Жаңа студент қосу
+                </h4>
+
+                <form onSubmit={handleAddStudent} className="space-y-4">
+                  <div>
+                    <label className="block text-[10px] text-slate-400 mb-1">Студент аты-жөні</label>
+                    <input 
+                      type="text" 
+                      required
+                      placeholder="Мысалы: Бақытжан Сағындықов"
+                      value={newStudentName}
+                      onChange={(e) => setNewStudentName(e.target.value)}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-emerald-500 transition"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] text-slate-400 mb-1">Оқу тобы</label>
+                    <select 
+                      value={newStudentGroup}
+                      onChange={(e) => setNewStudentGroup(e.target.value)}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 transition"
+                    >
+                      <option value="БИО-23-01">БИО-23-01 тобы</option>
+                      <option value="БИО-23-02">БИО-23-02 тобы</option>
+                    </select>
+                  </div>
+
+                  <button 
+                    type="submit"
+                    className="w-full bg-emerald-500 hover:bg-emerald-450 text-slate-950 font-bold py-2.5 rounded-xl transition text-xs shadow-lg shadow-emerald-500/10"
+                  >
+                    Журналға тіркеу
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
+
+      </main>
+
+      {/* =======================================================
+          МОДАЛДЫ ТЕРЕЗЕЛЕР (БАСТЫ БЕТТЕГІ ҰЯШЫҚТАР ҮШІН)
+         ======================================================= */}
+      
+      {/* Ғалымдар ақпараты */}
+      {selectedScientist && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-md w-full relative animate-scaleUp">
+            <button 
+              onClick={() => setSelectedScientist(null)}
+              className="absolute top-4 right-4 p-1.5 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-white transition"
+            >
+              <X className="w-4 h-4" />
+            </button>
+            <div className="flex gap-3 items-center mb-5">
+              <div className="w-12 h-12 bg-emerald-500 text-slate-950 rounded-xl flex items-center justify-center text-lg font-extrabold">
+                {selectedScientist.avatar}
+              </div>
+              <div>
+                <h3 className="font-bold text-slate-100 text-base">{selectedScientist.name}</h3>
+                <p className="text-[10px] text-emerald-400 font-mono">{selectedScientist.years}</p>
+              </div>
+            </div>
+            <div className="space-y-4 text-xs">
+              <div>
+                <span className="text-[10px] text-slate-500 uppercase tracking-wider">Негізгі жетістігі:</span>
+                <p className="text-slate-200 mt-1 leading-relaxed bg-slate-950 border border-slate-850 p-3 rounded-lg">{selectedScientist.achievement}</p>
+              </div>
+              <div>
+                <span className="text-[10px] text-slate-500 uppercase tracking-wider">Толық өмірбаяны:</span>
+                <p className="text-slate-300 mt-1 leading-relaxed">{selectedScientist.bio}</p>
+              </div>
+            </div>
             
-            const info = document.getElementById('3d-display-info');
-            if(part === 'calamus') {
-                info.innerText = "📍 Таңдалды: Қаламша\n\nҚауырсынның теріге бекитін төменгі бөлігі. Ол қуыс, мөлдір және жеңіл болады.";
-            } else if(part === 'rachis') {
-                info.innerText = "📍 Таңдалды: Дің (Rachis)\n\nҚауырсынның өзегі. Ол берік мүйізді заттан тұрады және екі жағынан желпуіш бекиді.";
-            } else {
-                info.innerText = "📍 Таңдалды: Мұртшалар\n\nҰсақ микроскопиялық ілмектер (barbicels) көршілес мұртшаларды өзара мықтап іліп тастайды.";
-            }
-        }
+            <div className="mt-6 flex gap-2">
+              {scientists.map((sc) => (
+                <button
+                  key={sc.id}
+                  onClick={() => setSelectedScientist(sc)}
+                  className={`flex-1 py-1.5 text-[10px] font-bold rounded-lg border transition ${selectedScientist.id === sc.id ? 'bg-emerald-500 border-emerald-500 text-slate-950' : 'bg-slate-800 border-slate-750 text-slate-300 hover:bg-slate-700'}`}
+                >
+                  {sc.avatar}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
-        // Grades Logic
-        function renderGrades() {
-            const body = document.getElementById('grades-table-body');
-            body.innerHTML = students.map(s => `
-                <tr class="hover:bg-slate-900/40 transition-all">
-                    <td class="p-4 font-semibold text-slate-200 text-xs md:text-sm">${s.name}</td>
-                    <td class="p-4 text-xs text-slate-400">${s.group}</td>
-                    ${s.attendance.map((att, idx) => `
-                        <td class="p-4 text-center">
-                            <button onclick="toggleAttendance(${s.id}, ${idx})" class="text-base">${att ? '✅' : '❌'}</button>
-                        </td>
-                    `).join('')}
-                    <td class="p-4 font-mono text-emerald-400 text-xs">${s.quizScores.join(', ')}</td>
-                </tr>
-            `).join('');
-        }
+      {/* Классификация ақпараты */}
+      {selectedClass && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-md w-full relative animate-scaleUp">
+            <button 
+              onClick={() => setSelectedClass(null)}
+              className="absolute top-4 right-4 p-1.5 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-white transition"
+            >
+              <X className="w-4 h-4" />
+            </button>
+            <div className="mb-5">
+              <span className="text-[9px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                Биологиялық жүйелеу
+              </span>
+              <h3 className="font-bold text-slate-100 text-base mt-2">{selectedClass.order}</h3>
+            </div>
+            <div className="space-y-4 text-xs">
+              <div>
+                <span className="text-[10px] text-slate-500 uppercase tracking-wider">Ерекше сипаттамасы:</span>
+                <p className="text-slate-200 mt-1 leading-relaxed bg-slate-950 border border-slate-850 p-3 rounded-lg">{selectedClass.traits}</p>
+              </div>
+              <div>
+                <span className="text-[10px] text-slate-500 uppercase tracking-wider">Белгілі өкілдері:</span>
+                <p className="text-emerald-400 font-semibold mt-1">{selectedClass.examples}</p>
+              </div>
+            </div>
+            
+            <div className="mt-6 grid grid-cols-2 gap-2">
+              {classification.map((cls, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setSelectedClass(cls)}
+                  className={`py-1.5 px-2 text-[9px] font-medium rounded-lg border transition truncate ${selectedClass.order === cls.order ? 'bg-emerald-500 border-emerald-500 text-slate-950' : 'bg-slate-800 border-slate-750 text-slate-300 hover:bg-slate-700'}`}
+                >
+                  {cls.order.split(' ')[0]}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
-        function toggleAttendance(id, idx) {
-            const s = students.find(std => std.id === id);
-            s.attendance[idx] = !s.attendance[idx];
-            renderGrades();
-            showToast('Қатысу күйі жаңартылды.');
-        }
+      {/* Қызықты деректер ақпараты */}
+      {selectedFact && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-md w-full relative animate-scaleUp">
+            <button 
+              onClick={() => setSelectedFact(null)}
+              className="absolute top-4 right-4 p-1.5 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-white transition"
+            >
+              <X className="w-4 h-4" />
+            </button>
+            <div className="mb-4">
+              <span className="text-[9px] text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded border border-emerald-500/20">
+                Ғылыми дерек
+              </span>
+              <h3 className="font-bold text-slate-100 text-base mt-2">{selectedFact.title}</h3>
+            </div>
+            <div className="text-xs">
+              <p className="text-slate-300 leading-relaxed bg-slate-950 border border-slate-850 p-4 rounded-xl">
+                {selectedFact.desc}
+              </p>
+            </div>
+            
+            <div className="mt-6 flex gap-2">
+              {interestingFacts.map((f, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setSelectedFact(f)}
+                  className={`flex-1 py-1.5 text-[10px] font-bold rounded-lg border transition ${selectedFact.title === f.title ? 'bg-emerald-500 border-emerald-500 text-slate-950' : 'bg-slate-800 border-slate-750 text-slate-300 hover:bg-slate-700'}`}
+                >
+                  Дерек {idx+1}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
-        function addStudent(e) {
-            e.preventDefault();
-            const nameInp = document.getElementById('new-student-name');
-            const name = nameInp.value.trim();
-            if(!name) return;
+      {/* ТӨМЕНГІ МӘЗІР (Мобильді нұсқа үшін) */}
+      <footer className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 grid grid-cols-5 py-2.5 z-20">
+        <button 
+          onClick={() => setActiveTab('home')} 
+          className={`flex flex-col items-center justify-center transition ${activeTab === 'home' ? 'text-emerald-400 font-bold' : 'text-slate-500'}`}
+        >
+          <Home className="w-5 h-5" />
+          <span className="text-[9px] mt-1">Басты</span>
+        </button>
 
-            students.push({
-                id: Date.now(),
-                name: name,
-                group: 'БИО-23-01',
-                attendance: [true, true, true, true, true],
-                quizScores: [80]
-            });
+        <button 
+          onClick={() => setActiveTab('materials')} 
+          className={`flex flex-col items-center justify-center transition ${activeTab === 'materials' ? 'text-emerald-400 font-bold' : 'text-slate-500'}`}
+        >
+          <BookOpen className="w-5 h-5" />
+          <span className="text-[9px] mt-1">Материал</span>
+        </button>
 
-            nameInp.value = '';
-            renderGrades();
-            showToast('Жаңа студент тізімге сәтті қосылды!');
-        }
+        <button 
+          onClick={() => setActiveTab('quiz')} 
+          className={`flex flex-col items-center justify-center transition ${activeTab === 'quiz' ? 'text-emerald-400 font-bold' : 'text-slate-500'}`}
+        >
+          <Award className="w-5 h-5" />
+          <span className="text-[9px] mt-1">Тест</span>
+        </button>
 
-        // Core Init
-        window.onload = () => {
-            initHome();
-            initLectures();
-            initQuiz();
-            initVideos();
-            select3D('calamus');
-            renderGrades();
-        };
-    </script>
-</body>
-</html>
+        <button 
+          onClick={() => setActiveTab('videos')} 
+          className={`flex flex-col items-center justify-center transition ${activeTab === 'videos' ? 'text-emerald-400 font-bold' : 'text-slate-500'}`}
+        >
+          <Video className="w-5 h-5" />
+          <span className="text-[9px] mt-1">Бейне</span>
+        </button>
+
+        <button 
+          onClick={() => setActiveTab('3d')} 
+          className={`flex flex-col items-center justify-center transition ${activeTab === '3d' ? 'text-emerald-400 font-bold' : 'text-slate-500'}`}
+        >
+          <Layers className="w-5 h-5" />
+          <span className="text-[9px] mt-1">3D</span>
+        </button>
+      </footer>
+
+    </div>
+  );
+}
